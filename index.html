@@ -19,7 +19,13 @@
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; margin: 0; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            overflow: hidden; 
+            height: 100vh; 
+            height: 100dvh; 
+            margin: 0; 
+        }
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background-color: rgba(150,150,150,0.3); border-radius: 10px; }
@@ -28,12 +34,24 @@
         .fade-in { animation: fadeIn 0.25s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         .modal-overlay { backdrop-filter: blur(6px); background-color: rgba(0, 0, 0, 0.6); }
+
+        /* Responsive Drawer styling for Mobile Right Panel */
+        @media (max-width: 1023px) {
+            .mobile-right-panel {
+                position: fixed !important;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                z-index: 50;
+                box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            }
+        }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200">
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 px-5 py-3 rounded-xl shadow-2xl z-[150] hidden flex items-center gap-3 text-sm font-medium border transition-all">
+    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 px-5 py-3 rounded-xl shadow-2xl z-[150] hidden flex items-center gap-3 text-sm font-medium border transition-all max-w-[90vw]">
         <span id="toast-msg"></span>
     </div>
 
@@ -82,22 +100,22 @@
     </div>
 
     <!-- View: Landing Portal Selection -->
-    <div id="view-landing" class="view active items-center justify-center p-4 relative">
+    <div id="view-landing" class="view items-center justify-center p-4 relative overflow-y-auto">
         <button onclick="UI.toggleTheme()" class="absolute top-6 right-6 p-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:scale-105 transition-all">
             <svg class="w-5 h-5 theme-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
         </button>
-        <div class="text-center mb-10 fade-in">
+        <div class="text-center mb-8 md:mb-10 fade-in">
             <div class="w-16 h-16 mx-auto bg-gradient-to-tr from-amber-600 to-yellow-400 rounded-2xl flex items-center justify-center mb-4 shadow-lg text-black font-bold text-2xl">CRM</div>
             <h1 class="text-2xl font-bold mb-1">Support Workspace</h1>
             <p class="text-slate-500 text-xs">Select your portal to continue</p>
         </div>
-        <div class="flex flex-col sm:flex-row gap-5 w-full max-w-md fade-in">
-            <button onclick="UI.navigate('admin-login')" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-500 rounded-2xl p-6 text-left transition-all shadow-sm group">
+        <div class="flex flex-col sm:flex-row gap-4 sm:gap-5 w-full max-w-md fade-in">
+            <button onclick="UI.navigate('admin-login')" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-500 rounded-2xl p-5 md:p-6 text-left transition-all shadow-sm group">
                 <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3 group-hover:text-amber-500 transition-colors">👑</div>
                 <h2 class="font-bold text-base group-hover:text-amber-500">Admin Portal</h2>
                 <p class="text-slate-500 text-xs mt-1">Management & monitoring</p>
             </button>
-            <button onclick="UI.navigate('agent-login')" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-500 rounded-2xl p-6 text-left transition-all shadow-sm group">
+            <button onclick="UI.navigate('agent-login')" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-500 rounded-2xl p-5 md:p-6 text-left transition-all shadow-sm group">
                 <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3 group-hover:text-amber-500 transition-colors">🎧</div>
                 <h2 class="font-bold text-base group-hover:text-amber-500">Agent Portal</h2>
                 <p class="text-slate-500 text-xs mt-1">Live client support</p>
@@ -106,9 +124,9 @@
     </div>
 
     <!-- View: Admin Login -->
-    <div id="view-admin-login" class="view items-center justify-center p-4 relative">
+    <div id="view-admin-login" class="view items-center justify-center p-4 relative overflow-y-auto">
         <button onclick="UI.navigate('landing')" class="absolute top-6 left-6 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center gap-2 text-xs font-semibold bg-slate-200 dark:bg-slate-800 px-3.5 py-2 rounded-xl">← Back</button>
-        <div class="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl fade-in">
+        <div class="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl fade-in">
             <h2 class="text-xl font-bold mb-1 text-center">Admin Secure Login</h2>
             <p class="text-slate-500 text-xs text-center mb-6">Enter system admin credentials</p>
             <form id="form-admin-login" class="space-y-4">
@@ -120,9 +138,9 @@
     </div>
 
     <!-- View: Agent Login -->
-    <div id="view-agent-login" class="view items-center justify-center p-4 relative">
+    <div id="view-agent-login" class="view items-center justify-center p-4 relative overflow-y-auto">
         <button onclick="UI.navigate('landing')" class="absolute top-6 left-6 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center gap-2 text-xs font-semibold bg-slate-200 dark:bg-slate-800 px-3.5 py-2 rounded-xl">← Back</button>
-        <div class="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl fade-in">
+        <div class="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl fade-in">
             <h2 class="text-xl font-bold mb-1 text-center">Agent Login</h2>
             <p class="text-slate-500 text-xs text-center mb-6">Sign in with your assigned credentials</p>
             <form id="form-agent-login" class="space-y-4">
@@ -134,31 +152,31 @@
     </div>
 
     <!-- View: Admin Dashboard -->
-    <div id="view-admin-dash" class="view bg-slate-50 dark:bg-slate-950 flex-row">
-        <!-- Sidebar -->
-        <nav class="w-16 md:w-60 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0 z-20">
-            <div class="h-16 flex items-center justify-between px-4 md:px-6 border-b border-slate-200 dark:border-slate-800">
-                <span class="font-bold text-sm hidden md:block" id="admin-brand-title">Admin HQ</span>
+    <div id="view-admin-dash" class="view bg-slate-50 dark:bg-slate-950 flex-col md:flex-row">
+        <!-- Sidebar Navigation (Top Header Bar on Mobile, Left Column on Desktop) -->
+        <nav class="w-full md:w-60 bg-white dark:bg-slate-900 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0 z-20">
+            <div class="h-14 md:h-16 flex items-center justify-between px-4 md:px-6 border-b border-slate-200 dark:border-slate-800 shrink-0">
+                <span class="font-bold text-sm block" id="admin-brand-title">Admin HQ</span>
                 <button onclick="UI.toggleTheme()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs">🌓</button>
             </div>
-            <div class="flex-1 py-4 flex flex-col gap-1.5 px-3 overflow-y-auto">
-                <button onclick="UI.switchAdminTab('agents')" id="tab-btn-agents" class="p-3 rounded-xl text-left bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center gap-3 font-medium text-sm">
-                    <span>👥</span> <span class="hidden md:inline">Agents</span>
+            <div class="py-2 md:py-4 flex flex-row md:flex-col gap-1.5 px-3 overflow-x-auto md:overflow-y-auto shrink-0 scrollbar-none">
+                <button onclick="UI.switchAdminTab('agents')" id="tab-btn-agents" class="p-2.5 md:p-3 rounded-xl text-left bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center gap-2.5 font-medium text-xs md:text-sm whitespace-nowrap">
+                    <span>👥</span> <span>Agents</span>
                 </button>
-                <button onclick="UI.switchAdminTab('chats')" id="tab-btn-chats" class="p-3 rounded-xl text-left text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 font-medium text-sm">
-                    <span>💬</span> <span class="hidden md:inline">Live Chats</span>
+                <button onclick="UI.switchAdminTab('chats')" id="tab-btn-chats" class="p-2.5 md:p-3 rounded-xl text-left text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 font-medium text-xs md:text-sm whitespace-nowrap">
+                    <span>💬</span> <span>Live Chats</span>
                 </button>
-                <button onclick="UI.switchAdminTab('newjoins')" id="tab-btn-newjoins" class="p-3 rounded-xl text-left text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 font-medium text-sm">
-                    <span>✨</span> <span class="hidden md:inline">New Joins</span>
+                <button onclick="UI.switchAdminTab('newjoins')" id="tab-btn-newjoins" class="p-2.5 md:p-3 rounded-xl text-left text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 font-medium text-xs md:text-sm whitespace-nowrap">
+                    <span>✨</span> <span>New Joins</span>
                 </button>
-                <button onclick="UI.switchAdminTab('livestatus')" id="tab-btn-livestatus" class="p-3 rounded-xl text-left text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 font-medium text-sm">
-                    <span>⚡</span> <span class="hidden md:inline">Live Status</span>
+                <button onclick="UI.switchAdminTab('livestatus')" id="tab-btn-livestatus" class="p-2.5 md:p-3 rounded-xl text-left text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 font-medium text-xs md:text-sm whitespace-nowrap">
+                    <span>⚡</span> <span>Live Status</span>
                 </button>
-                <button onclick="UI.switchAdminTab('monitor')" id="tab-btn-monitor" class="p-3 rounded-xl text-left text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 font-medium text-sm">
-                    <span>📊</span> <span class="hidden md:inline">Signed Clients</span>
+                <button onclick="UI.switchAdminTab('monitor')" id="tab-btn-monitor" class="p-2.5 md:p-3 rounded-xl text-left text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 font-medium text-xs md:text-sm whitespace-nowrap">
+                    <span>📊</span> <span>Signed Clients</span>
                 </button>
             </div>
-            <div class="p-3 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-2">
+            <div class="hidden md:flex p-3 border-t border-slate-200 dark:border-slate-800 flex-col gap-2 mt-auto">
                 <button onclick="UI.openModal('admin-settings')" class="w-full py-2.5 px-3 text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-center">Settings / Edit Profile</button>
                 <button onclick="app.logout()" class="w-full py-2.5 px-3 text-xs font-semibold text-red-500 hover:bg-red-500/10 rounded-xl text-center">Logout</button>
             </div>
@@ -166,11 +184,15 @@
 
         <!-- Tab: Agents Management -->
         <div id="admin-tab-agents" class="flex-1 flex flex-col h-full overflow-hidden">
-            <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 flex items-center justify-between px-6 shrink-0">
-                <h2 class="font-bold text-base">Agent Management & Availability</h2>
+            <div class="h-14 md:h-16 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 flex items-center justify-between px-4 md:px-6 shrink-0">
+                <h2 class="font-bold text-sm md:text-base">Agent Management</h2>
+                <div class="flex items-center gap-2 md:hidden">
+                    <button onclick="UI.openModal('admin-settings')" class="p-2 text-xs font-semibold bg-slate-200 dark:bg-slate-800 rounded-lg">⚙️</button>
+                    <button onclick="app.logout()" class="p-2 text-xs font-semibold text-red-500 bg-red-500/10 rounded-lg">🚪</button>
+                </div>
             </div>
-            <div class="flex-1 overflow-y-auto p-6 space-y-6">
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-6 shadow-sm">
                     <h3 class="font-bold text-sm mb-4">Create New Agent</h3>
                     <form id="form-create-agent" class="flex flex-col md:flex-row gap-3">
                         <input type="text" id="new-agt-name" placeholder="Full Name" class="flex-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none" required>
@@ -180,30 +202,32 @@
                     </form>
                 </div>
                 <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-                    <table class="w-full text-left text-sm whitespace-nowrap">
-                        <tr class="bg-slate-100 dark:bg-slate-800/50 text-slate-500 text-xs uppercase font-semibold">
-                            <th class="px-5 py-3.5">Agent</th>
-                            <th class="px-5 py-3.5">Status / Availability</th>
-                            <th class="px-5 py-3.5">Last Login / Logout</th>
-                            <th class="px-5 py-3.5 text-right">Actions</th>
-                        </tr>
-                        <tbody id="admin-agents-list" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <tr class="bg-slate-100 dark:bg-slate-800/50 text-slate-500 text-xs uppercase font-semibold">
+                                <th class="px-5 py-3.5">Agent</th>
+                                <th class="px-5 py-3.5">Status / Availability</th>
+                                <th class="px-5 py-3.5">Last Login / Logout</th>
+                                <th class="px-5 py-3.5 text-right">Actions</th>
+                            </tr>
+                            <tbody id="admin-agents-list" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tab: Admin Live Chats Monitoring (UPDATED HIERARCHY) -->
-        <div id="admin-tab-chats" class="flex-1 flex flex-row h-full overflow-hidden hidden bg-white dark:bg-slate-950">
-            <div class="w-80 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full bg-slate-50 dark:bg-slate-900">
-                <div id="admin-chat-sidebar-header" class="p-4 border-b border-slate-200 dark:border-slate-800 font-bold text-xs uppercase text-slate-500 flex justify-between items-center">
+        <!-- Tab: Admin Live Chats Monitoring -->
+        <div id="admin-tab-chats" class="flex-1 flex flex-col md:flex-row h-full overflow-hidden hidden bg-white dark:bg-slate-950">
+            <div class="w-full md:w-80 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 flex flex-col h-1/2 md:h-full bg-slate-50 dark:bg-slate-900 shrink-0">
+                <div id="admin-chat-sidebar-header" class="p-3 md:p-4 border-b border-slate-200 dark:border-slate-800 font-bold text-xs uppercase text-slate-500 flex justify-between items-center">
                     <span>SELECT AGENT</span>
                 </div>
                 <div class="flex-1 overflow-y-auto divide-y divide-slate-200 dark:divide-slate-800" id="admin-chat-client-list"></div>
             </div>
-            <div class="flex-1 flex flex-col h-full relative">
-                <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center px-6 justify-between">
-                    <div id="admin-chat-header-info" class="text-xs text-slate-500 font-medium">Select an Agent to view conversations</div>
+            <div class="flex-1 flex flex-col h-1/2 md:h-full relative">
+                <div class="h-12 md:h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center px-4 md:px-6 justify-between shrink-0">
+                    <div id="admin-chat-header-info" class="text-xs text-slate-500 font-medium truncate">Select an Agent to view conversations</div>
                 </div>
                 <div class="flex-1 p-4 overflow-y-auto flex flex-col gap-3" id="admin-chat-messages">
                     <div class="h-full flex items-center justify-center text-xs text-slate-400">Choose an Agent from the left list</div>
@@ -213,11 +237,11 @@
 
         <!-- Tab: New Joins -->
         <div id="admin-tab-newjoins" class="flex-1 flex flex-col h-full overflow-hidden hidden">
-            <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 flex items-center justify-between px-6 shrink-0">
-                <h2 class="font-bold text-base">New Joins Directory (Agents & Users)</h2>
+            <div class="h-14 md:h-16 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 flex items-center justify-between px-4 md:px-6 shrink-0">
+                <h2 class="font-bold text-sm md:text-base">New Joins Directory</h2>
             </div>
-            <div class="flex-1 overflow-y-auto p-6 space-y-6">
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-6 shadow-sm">
                     <h3 class="font-bold text-sm mb-4 text-amber-500">🎧 Recently Joined Agents</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm whitespace-nowrap">
@@ -230,7 +254,7 @@
                         </table>
                     </div>
                 </div>
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-6 shadow-sm">
                     <h3 class="font-bold text-sm mb-4 text-emerald-500">👤 Recently Joined Clients / Users</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm whitespace-nowrap">
@@ -249,29 +273,29 @@
 
         <!-- Tab: Live Status Updates -->
         <div id="admin-tab-livestatus" class="flex-1 flex flex-col h-full overflow-hidden hidden">
-            <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 flex items-center justify-between px-6 shrink-0">
-                <h2 class="font-bold text-base">Real-Time Live Status Updates</h2>
+            <div class="h-14 md:h-16 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 flex items-center justify-between px-4 md:px-6 shrink-0">
+                <h2 class="font-bold text-sm md:text-base">Real-Time Live Status Updates</h2>
             </div>
-            <div class="flex-1 overflow-y-auto p-6 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-                        <p class="text-xs text-slate-400 font-semibold uppercase">Total Agents</p>
-                        <h3 class="text-2xl font-bold mt-2" id="stat-total-agents">0</h3>
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-5 shadow-sm">
+                        <p class="text-[10px] md:text-xs text-slate-400 font-semibold uppercase">Total Agents</p>
+                        <h3 class="text-xl md:text-2xl font-bold mt-2" id="stat-total-agents">0</h3>
                     </div>
-                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-                        <p class="text-xs text-emerald-500 font-semibold uppercase">Agents Online</p>
-                        <h3 class="text-2xl font-bold mt-2 text-emerald-500" id="stat-online-agents">0</h3>
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-5 shadow-sm">
+                        <p class="text-[10px] md:text-xs text-emerald-500 font-semibold uppercase">Agents Online</p>
+                        <h3 class="text-xl md:text-2xl font-bold mt-2 text-emerald-500" id="stat-online-agents">0</h3>
                     </div>
-                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-                        <p class="text-xs text-amber-500 font-semibold uppercase">Active Client Chats</p>
-                        <h3 class="text-2xl font-bold mt-2 text-amber-500" id="stat-total-clients">0</h3>
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-5 shadow-sm">
+                        <p class="text-[10px] md:text-xs text-amber-500 font-semibold uppercase">Active Client Chats</p>
+                        <h3 class="text-xl md:text-2xl font-bold mt-2 text-amber-500" id="stat-total-clients">0</h3>
                     </div>
-                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-                        <p class="text-xs text-blue-500 font-semibold uppercase">Total Messages Exchanged</p>
-                        <h3 class="text-2xl font-bold mt-2 text-blue-500" id="stat-total-msgs">0</h3>
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-5 shadow-sm">
+                        <p class="text-[10px] md:text-xs text-blue-500 font-semibold uppercase">Total Messages</p>
+                        <h3 class="text-xl md:text-2xl font-bold mt-2 text-blue-500" id="stat-total-msgs">0</h3>
                     </div>
                 </div>
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-6 shadow-sm">
                     <h3 class="font-bold text-sm mb-4">⚡ Real-Time Activity Feed</h3>
                     <div class="space-y-2.5 max-h-[350px] overflow-y-auto" id="live-activity-feed">
                         <div class="text-xs text-slate-400">Monitoring real-time actions...</div>
@@ -282,32 +306,37 @@
 
         <!-- Tab: Monitor & Client Export -->
         <div id="admin-tab-monitor" class="flex-1 flex flex-col h-full overflow-hidden hidden">
-            <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 flex items-center justify-between px-6 shrink-0">
-                <h2 class="font-bold text-base">Signed-In Users Directory</h2>
-                <button onclick="app.exportClientsExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-sm">
-                    📥 Download Excel (CSV)
+            <div class="h-14 md:h-16 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 flex items-center justify-between px-4 md:px-6 shrink-0 gap-2">
+                <h2 class="font-bold text-sm md:text-base truncate">Signed-In Users</h2>
+                <button onclick="app.exportClientsExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-sm shrink-0">
+                    📥 <span class="hidden sm:inline">Download Excel</span> (CSV)
                 </button>
             </div>
-            <div class="flex-1 overflow-y-auto p-6">
+            <div class="flex-1 overflow-y-auto p-4 md:p-6">
                 <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-                    <table class="w-full text-left text-sm whitespace-nowrap">
-                        <tr class="bg-slate-100 dark:bg-slate-800/50 text-slate-500 text-xs uppercase font-semibold">
-                            <th class="px-5 py-3.5">Client Name</th>
-                            <th class="px-5 py-3.5">Phone Number</th>
-                            <th class="px-5 py-3.5">Assigned Agent</th>
-                            <th class="px-5 py-3.5">Joined Time</th>
-                        </tr>
-                        <tbody id="admin-clients-list" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <tr class="bg-slate-100 dark:bg-slate-800/50 text-slate-500 text-xs uppercase font-semibold">
+                                <th class="px-5 py-3.5">Client Name</th>
+                                <th class="px-5 py-3.5">Phone Number</th>
+                                <th class="px-5 py-3.5">Assigned Agent</th>
+                                <th class="px-5 py-3.5">Joined Time</th>
+                            </tr>
+                            <tbody id="admin-clients-list" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- View: Agent Dashboard -->
-    <div id="view-agent-dash" class="view bg-slate-50 dark:bg-slate-950 flex-row">
+    <div id="view-agent-dash" class="view bg-slate-50 dark:bg-slate-950 flex-row relative">
+        <!-- Overlay for Mobile Sidebar Drawer -->
+        <div id="agent-sidebar-overlay" onclick="UI.closeAgentSidebar()" class="fixed inset-0 bg-black/60 z-20 hidden md:hidden backdrop-blur-sm"></div>
+
         <!-- Sidebar: Client List (Left Column) -->
-        <div class="w-full md:w-80 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full shrink-0 absolute md:relative z-30 -translate-x-full md:translate-x-0 transition-transform" id="agent-sidebar">
+        <div class="w-80 max-w-[85vw] md:max-w-none bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full shrink-0 absolute md:relative z-30 -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out" id="agent-sidebar">
             <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex justify-between items-center">
                 <div class="flex items-center gap-2.5">
                     <div class="w-9 h-9 rounded-full bg-amber-500 text-black font-bold flex items-center justify-center text-sm" id="agent-dash-initial">A</div>
@@ -332,22 +361,22 @@
         </div>
 
         <!-- Chat Panel (Middle Column) -->
-        <div class="flex-1 flex flex-col h-full bg-white dark:bg-slate-950 relative border-r border-slate-200 dark:border-slate-800">
+        <div class="flex-1 flex flex-col h-full bg-white dark:bg-slate-950 relative border-r border-slate-200 dark:border-slate-800 w-full">
             <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center px-4 justify-between shrink-0 z-10">
-                <div class="flex items-center gap-3">
-                    <button onclick="document.getElementById('agent-sidebar').classList.remove('-translate-x-full')" class="md:hidden text-lg">☰</button>
-                    <div id="agent-active-client-info" class="flex items-center gap-3 hidden">
-                        <div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-bold text-sm" id="agent-chat-initial">C</div>
-                        <div>
-                            <h3 class="font-bold text-xs" id="agent-chat-title">Client</h3>
-                            <p class="text-[10px] text-amber-500" id="agent-chat-subtitle">Phone</p>
+                <div class="flex items-center gap-3 truncate">
+                    <button onclick="UI.openAgentSidebar()" class="md:hidden text-lg p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800">☰</button>
+                    <div id="agent-active-client-info" class="flex items-center gap-3 hidden truncate">
+                        <div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-bold text-sm shrink-0" id="agent-chat-initial">C</div>
+                        <div class="truncate">
+                            <h3 class="font-bold text-xs truncate" id="agent-chat-title">Client</h3>
+                            <p class="text-[10px] text-amber-500 truncate" id="agent-chat-subtitle">Phone</p>
                         </div>
                     </div>
                     <div id="agent-no-client-info" class="text-xs text-slate-500 font-medium">Select a client chat</div>
                 </div>
-                <div id="agent-chat-actions" class="hidden flex items-center gap-2">
-                    <button id="btn-toggle-right-panel" onclick="UI.toggleAgentRightPanel()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold rounded-xl">Profile Info ℹ️</button>
-                    <button id="btn-mute-chat" onclick="app.toggleMuteActiveClient()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold rounded-xl">Mute Chat 🔔</button>
+                <div id="agent-chat-actions" class="hidden flex items-center gap-2 shrink-0">
+                    <button id="btn-toggle-right-panel" onclick="UI.toggleAgentRightPanel()" class="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold rounded-xl">Info ℹ️</button>
+                    <button id="btn-mute-chat" onclick="app.toggleMuteActiveClient()" class="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold rounded-xl">Mute 🔔</button>
                 </div>
             </div>
 
@@ -363,10 +392,11 @@
             </div>
         </div>
 
-        <!-- Client Details & Quick Replies (Right Column) -->
-        <div id="agent-right-panel" class="w-80 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col h-full shrink-0 hidden lg:flex">
+        <!-- Client Details & Quick Replies (Right Column Drawer) -->
+        <div id="agent-right-panel" class="w-80 max-w-[85vw] lg:max-w-none bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col h-full shrink-0 hidden lg:flex mobile-right-panel">
             <div class="p-4 border-b border-slate-200 dark:border-slate-800 font-bold text-xs uppercase text-slate-400 flex justify-between items-center">
                 <span>Client Profile & Tools</span>
+                <button onclick="UI.toggleAgentRightPanel()" class="lg:hidden text-slate-500 font-bold text-base px-2">✕</button>
             </div>
             <div class="p-4 flex-1 overflow-y-auto space-y-5">
                 <div id="right-client-details" class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 space-y-2">
@@ -403,7 +433,7 @@
     </div>
 
     <!-- View: Client Onboarding -->
-    <div id="view-client-onboard" class="view items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
+    <div id="view-client-onboard" class="view items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 overflow-y-auto">
         <div class="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl fade-in text-center">
             <h2 class="text-xl font-bold mb-1">Live Support Secure</h2>
             <p class="text-xs text-slate-500 mb-6">Connecting with <span id="client-agent-name" class="text-amber-500 font-bold">Agent</span></p>
@@ -467,7 +497,7 @@
             db: null, auth: null, user: null, role: null,
             agents: [], clients: [], messages: [], mutes: {},
             targetAgentId: null, myAgentId: null, myClientId: null,
-            adminSelectedAgentId: null, // Track currently selected agent in Live Chats
+            adminSelectedAgentId: null,
             adminSelectedClient: null, agentSelectedClient: null,
             unsubscribers: []
         };
@@ -494,7 +524,7 @@
                     const btn = document.getElementById(`tab-btn-${t}`);
                     if(el) el.classList.toggle('hidden', t !== tab);
                     if(btn) {
-                        btn.className = t === tab ? 'p-3 rounded-xl text-left bg-amber-500/10 text-amber-500 flex items-center gap-3 font-medium text-sm' : 'p-3 rounded-xl text-left text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 font-medium text-sm';
+                        btn.className = t === tab ? 'p-2.5 md:p-3 rounded-xl text-left bg-amber-500/10 text-amber-500 flex items-center gap-2.5 font-medium text-xs md:text-sm whitespace-nowrap' : 'p-2.5 md:p-3 rounded-xl text-left text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 font-medium text-xs md:text-sm whitespace-nowrap';
                     }
                 });
                 if(tab === 'chats') {
@@ -509,8 +539,16 @@
             escape: (str) => { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; },
             scrollBottom: (id) => { const el = document.getElementById(id); if(el) setTimeout(() => el.scrollTop = el.scrollHeight, 50); },
             openModal: (id) => document.getElementById(`modal-${id}`).classList.remove('hidden'),
-            closeModal: (id) => document.getElementById(`modal-${id}`).add ? document.getElementById(`modal-${id}`).classList.add('hidden') : document.getElementById(`modal-${id}`).classList.add('hidden'),
+            closeModal: (id) => document.getElementById(`modal-${id}`).classList.add('hidden'),
             copyLink: (id) => { document.getElementById(id).select(); document.execCommand('copy'); UI.showToast("Invite link copied!"); },
+            openAgentSidebar: () => {
+                document.getElementById('agent-sidebar').classList.remove('-translate-x-full');
+                document.getElementById('agent-sidebar-overlay').classList.remove('hidden');
+            },
+            closeAgentSidebar: () => {
+                document.getElementById('agent-sidebar').classList.add('-translate-x-full');
+                document.getElementById('agent-sidebar-overlay').classList.add('hidden');
+            },
             toggleAgentRightPanel: () => {
                 const panel = document.getElementById('agent-right-panel');
                 if(panel) panel.classList.toggle('hidden');
@@ -695,11 +733,10 @@
                 if(!state.agentSelectedClient) return;
                 state.mutes[state.agentSelectedClient] = !state.mutes[state.agentSelectedClient];
                 const btn = document.getElementById('btn-mute-chat');
-                btn.textContent = state.mutes[state.agentSelectedClient] ? "Unmute Chat 🔕" : "Mute Chat 🔔";
+                btn.textContent = state.mutes[state.agentSelectedClient] ? "Unmute 🔕" : "Mute 🔔";
                 UI.showToast(state.mutes[state.agentSelectedClient] ? "Chat muted" : "Chat unmuted");
             },
 
-            // Select Agent in Admin Live Chats
             adminSelectAgent: (agentId) => {
                 state.adminSelectedAgentId = agentId;
                 state.adminSelectedClient = null;
@@ -707,7 +744,6 @@
                 renderAdminChatMessages();
             },
 
-            // Clear Agent selection to go back to Agents List
             adminClearSelectedAgent: () => {
                 state.adminSelectedAgentId = null;
                 state.adminSelectedClient = null;
@@ -723,7 +759,7 @@
 
             agentSelectClient: async (clientId) => {
                 state.agentSelectedClient = clientId;
-                if(window.innerWidth < 768) document.getElementById('agent-sidebar').classList.add('-translate-x-full');
+                UI.closeAgentSidebar();
                 
                 const client = state.clients.find(c => c.id === clientId);
                 if(client) {
@@ -748,7 +784,7 @@
                     if(rNotes) rNotes.value = localStorage.getItem(`crm_note_${clientId}`) || '';
 
                     const btnMute = document.getElementById('btn-mute-chat');
-                    btnMute.textContent = state.mutes[clientId] ? "Unmute Chat 🔕" : "Mute Chat 🔔";
+                    btnMute.textContent = state.mutes[clientId] ? "Unmute 🔕" : "Mute 🔔";
 
                     const unreadMsgs = state.messages.filter(m => m.clientId === clientId && m.sender === 'client' && !m.seen);
                     for(let m of unreadMsgs) {
@@ -1003,22 +1039,20 @@
             events.sort((a,b) => b.time - a.time).slice(0, 10).forEach(ev => {
                 feedHtml += `
                     <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl text-xs">
-                        <span>${ev.text}</span>
-                        <span class="text-[10px] text-slate-400 font-mono">${UI.formatDate(ev.time)}</span>
+                        <span class="truncate pr-2">${ev.text}</span>
+                        <span class="text-[10px] text-slate-400 font-mono shrink-0">${UI.formatDate(ev.time)}</span>
                     </div>
                 `;
             });
             if(feed) feed.innerHTML = feedHtml || `<div class="text-xs text-slate-400">No recent activity</div>`;
         }
 
-        // Render Live Chats sidebar (Level 1: Agents List OR Level 2: Clients of selected Agent)
         function renderAdminChatsList() {
             const list = document.getElementById('admin-chat-client-list');
             const header = document.getElementById('admin-chat-sidebar-header');
             if(!list || state.role !== 'admin') return;
 
             if (!state.adminSelectedAgentId) {
-                // STEP 1: Show list of all Agents
                 if (header) {
                     header.innerHTML = `<span>Select Agent</span> <span class="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded font-bold">${state.agents.length} Agents</span>`;
                 }
@@ -1046,14 +1080,13 @@
                 });
                 list.innerHTML = html || `<div class="p-6 text-center text-slate-400 text-xs">No agents created yet.</div>`;
             } else {
-                // STEP 2: Show list of Clients under Selected Agent
                 const currentAgent = state.agents.find(a => a.id === state.adminSelectedAgentId);
                 const agentName = currentAgent ? currentAgent.name : 'Agent';
 
                 if (header) {
                     header.innerHTML = `
                         <button onclick="app.adminClearSelectedAgent()" class="flex items-center gap-1 text-amber-500 hover:text-amber-400 font-bold text-xs">
-                            ← Back to Agents
+                            ← Back
                         </button>
                         <span class="font-bold text-xs truncate max-w-[120px] text-slate-700 dark:text-slate-300">${UI.escape(agentName)}</span>
                     `;
@@ -1086,7 +1119,6 @@
             }
         }
 
-        // Render Chat Messages panel for Admin
         function renderAdminChatMessages() {
             const view = document.getElementById('admin-chat-messages');
             const header = document.getElementById('admin-chat-header-info');
@@ -1108,7 +1140,7 @@
             const client = state.clients.find(c => c.id === state.adminSelectedClient);
             const ag = client ? state.agents.find(a => a.id === client.agentId) : null;
             if(client && header) {
-                header.innerHTML = `<div class="flex items-center gap-2"><span class="font-bold text-xs">${UI.escape(client.name)}</span> <span class="text-[10px] text-slate-400">(${client.phone})</span> <span class="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded font-semibold">Agent: ${ag ? UI.escape(ag.name) : 'Unknown'}</span></div>`;
+                header.innerHTML = `<div class="flex items-center gap-2 truncate"><span class="font-bold text-xs truncate">${UI.escape(client.name)}</span> <span class="text-[10px] text-slate-400">(${client.phone})</span> <span class="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded font-semibold truncate">Agent: ${ag ? UI.escape(ag.name) : 'Unknown'}</span></div>`;
             }
 
             const matchingClientIds = client ? state.clients.filter(c => c.phone === client.phone).map(c => c.id) : [state.adminSelectedClient];
@@ -1118,7 +1150,7 @@
                 const isClient = m.sender === 'client';
                 html += `
                     <div class="flex w-full ${isClient ? 'justify-start' : 'justify-end'} fade-in">
-                        <div class="max-w-[75%] rounded-2xl px-4 py-3 ${isClient ? 'bg-slate-100 dark:bg-slate-800' : 'bg-amber-500 text-black'}">
+                        <div class="max-w-[85%] md:max-w-[75%] rounded-2xl px-4 py-3 ${isClient ? 'bg-slate-100 dark:bg-slate-800' : 'bg-amber-500 text-black'}">
                             <div class="text-[10px] font-bold mb-1 opacity-75">${isClient ? 'Client' : 'Agent'}</div>
                             <div class="text-xs break-words">${UI.escape(m.text)}</div>
                             <div class="text-[9px] text-right mt-1 opacity-60 font-semibold">${UI.formatTime(m.timestamp)}</div>
@@ -1179,7 +1211,7 @@
                 const isMe = m.sender === 'agent';
                 html += `
                     <div class="flex w-full ${isMe ? 'justify-end' : 'justify-start'} fade-in">
-                        <div class="max-w-[75%] rounded-2xl px-4 py-3 ${isMe ? 'bg-amber-500 text-black' : 'bg-slate-100 dark:bg-slate-800'}">
+                        <div class="max-w-[85%] md:max-w-[75%] rounded-2xl px-4 py-3 ${isMe ? 'bg-amber-500 text-black' : 'bg-slate-100 dark:bg-slate-800'}">
                             <div class="text-xs break-words">${UI.escape(m.text)}</div>
                             <div class="text-[9px] text-right mt-1 opacity-60 font-semibold">${UI.formatTime(m.timestamp)} ${isMe ? (m.seen ? '✓✓ Seen' : '✓ Sent') : ''}</div>
                         </div>
@@ -1224,7 +1256,7 @@
                 const isMe = m.sender === 'client';
                 html += `
                     <div class="flex w-full ${isMe ? 'justify-end' : 'justify-start'} fade-in">
-                        <div class="max-w-[75%] rounded-2xl px-4 py-3 ${isMe ? 'bg-amber-500 text-black' : 'bg-slate-100 dark:bg-slate-800'}">
+                        <div class="max-w-[85%] md:max-w-[75%] rounded-2xl px-4 py-3 ${isMe ? 'bg-amber-500 text-black' : 'bg-slate-100 dark:bg-slate-800'}">
                             <div class="text-xs break-words">${UI.escape(m.text)}</div>
                             <div class="text-[9px] text-right mt-1 opacity-60 font-semibold">${UI.formatTime(m.timestamp)} ${isMe ? (m.seen ? '✓✓ Seen' : '✓ Sent') : ''}</div>
                         </div>
