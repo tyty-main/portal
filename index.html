@@ -1,408 +1,305 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Premium Live Support CRM</title>
+    <title>Enterprise Live Support CRM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 500: '#f59e0b', 600: '#d97706' }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --accent: #f59e0b; /* Amber 500 */
-            --bg-base: #020617; /* Slate 950 */
-            --bg-panel: #0f172a; /* Slate 900 */
-            --border: #1e293b; /* Slate 800 */
-        }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg-base); 
-            color: #f8fafc; 
-            overflow: hidden; 
-            height: 100vh; 
-            margin: 0; 
-        }
-        
-        /* Custom Scrollbar */
+        body { font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; margin: 0; }
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background-color: #475569; }
-        
-        /* View Management */
+        ::-webkit-scrollbar-thumb { background-color: rgba(150,150,150,0.3); border-radius: 10px; }
         .view { display: none; height: 100%; width: 100%; flex-direction: column; }
         .view.active { display: flex; }
-        
-        /* Custom Inputs & Buttons */
-        .input-dark { 
-            background-color: #0f172a; 
-            border: 1px solid #1e293b; 
-            color: white; 
-            transition: all 0.2s; 
-        }
-        .input-dark:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-        
-        .btn-primary { 
-            background-color: var(--accent); 
-            color: #000; 
-            font-weight: 600; 
-            transition: all 0.2s; 
-        }
-        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); }
-        .btn-primary:active { transform: translateY(0); }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        
-        /* Animations */
-        .fade-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Modals */
-        .modal-overlay {
-            background-color: rgba(2, 6, 23, 0.8);
-            backdrop-filter: blur(4px);
-        }
+        .fade-in { animation: fadeIn 0.25s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-overlay { backdrop-filter: blur(6px); background-color: rgba(0, 0, 0, 0.6); }
     </style>
 </head>
-<body class="flex flex-col">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200">
 
-    <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg shadow-xl z-[100] hidden flex items-center gap-2 text-sm font-medium transition-all duration-300 border">
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 px-5 py-3 rounded-xl shadow-2xl z-[150] hidden flex items-center gap-3 text-sm font-medium border transition-all">
         <span id="toast-msg"></span>
     </div>
 
-    <!-- Password Reset Modal for Admin -->
-    <div id="modal-pwd-reset" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-[#0f172a] border border-[#1e293b] rounded-2xl p-6 w-full max-w-sm shadow-2xl fade-in">
-            <h3 class="text-lg font-bold text-white mb-2">Reset Agent Password</h3>
-            <p class="text-xs text-slate-400 mb-4" id="modal-pwd-agent-name"></p>
-            <input type="hidden" id="modal-pwd-agent-id">
-            <input type="password" id="modal-pwd-new" class="w-full input-dark px-4 py-3 rounded-xl text-sm mb-4" placeholder="Enter new password">
+    <!-- Modal: Admin Password Reset -->
+    <div id="modal-admin-pwd" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl fade-in">
+            <h3 class="text-lg font-bold mb-2">Change Admin Password</h3>
+            <p class="text-xs text-slate-500 mb-4">Enter your current and new password securely.</p>
+            <input type="password" id="admin-old-pwd" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm mb-3 outline-none focus:border-amber-500" placeholder="Current Password">
+            <input type="password" id="admin-new-pwd" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm mb-4 outline-none focus:border-amber-500" placeholder="New Password">
             <div class="flex gap-3 justify-end">
-                <button onclick="UI.closeModal('pwd-reset')" class="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors">Cancel</button>
-                <button onclick="app.confirmResetPassword()" class="btn-primary px-4 py-2 rounded-xl text-sm">Save Password</button>
+                <button onclick="UI.closeModal('admin-pwd')" class="px-4 py-2 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-white">Cancel</button>
+                <button onclick="app.updateAdminPassword()" class="bg-amber-500 text-black font-semibold px-4 py-2 rounded-xl text-sm hover:bg-amber-400">Update</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Reset Agent Password -->
+    <div id="modal-pwd-reset" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl fade-in">
+            <h3 class="text-lg font-bold mb-2">Reset Agent Password</h3>
+            <p class="text-xs text-slate-500 mb-4" id="modal-pwd-agent-name"></p>
+            <input type="hidden" id="modal-pwd-agent-id">
+            <input type="password" id="modal-pwd-new" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm mb-4 outline-none focus:border-amber-500" placeholder="Enter new password">
+            <div class="flex gap-3 justify-end">
+                <button onclick="UI.closeModal('pwd-reset')" class="px-4 py-2 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-white">Cancel</button>
+                <button onclick="app.confirmResetPassword()" class="bg-amber-500 text-black font-semibold px-4 py-2 rounded-xl text-sm hover:bg-amber-400">Save Password</button>
             </div>
         </div>
     </div>
 
     <!-- View: Loading -->
-    <div id="view-loading" class="view active items-center justify-center bg-slate-950">
-        <div class="w-12 h-12 border-4 border-slate-800 border-t-amber-500 rounded-full animate-spin mb-6 shadow-[0_0_15px_rgba(245,158,11,0.3)]"></div>
-        <p class="text-amber-500 text-sm tracking-widest uppercase font-semibold">Connecting Workspace...</p>
+    <div id="view-loading" class="view active items-center justify-center">
+        <div class="w-10 h-10 border-4 border-slate-300 dark:border-slate-800 border-t-amber-500 rounded-full animate-spin mb-4"></div>
+        <p class="text-amber-500 text-xs tracking-widest uppercase font-semibold">Secure Workspace Loading...</p>
     </div>
 
-    <!-- View: Landing -->
-    <div id="view-landing" class="view items-center justify-center p-4">
+    <!-- View: Landing Portal Selection -->
+    <div id="view-landing" class="view items-center justify-center p-4 relative">
+        <button onclick="UI.toggleTheme()" class="absolute top-6 right-6 p-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:scale-105 transition-all">
+            <svg class="w-5 h-5 theme-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        </button>
         <div class="text-center mb-10 fade-in">
-            <div class="w-20 h-20 mx-auto bg-gradient-to-tr from-amber-600 to-yellow-400 rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(245,158,11,0.25)] text-black">
-                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-            </div>
-            <h1 class="text-3xl font-bold text-white mb-2">Support Workspace</h1>
-            <p class="text-slate-400 text-sm">Select your login portal</p>
+            <div class="w-16 h-16 mx-auto bg-gradient-to-tr from-amber-600 to-yellow-400 rounded-2xl flex items-center justify-center mb-4 shadow-lg text-black font-bold text-2xl">CRM</div>
+            <h1 class="text-2xl font-bold mb-1">Support Workspace</h1>
+            <p class="text-slate-500 text-xs">Select your portal to continue</p>
         </div>
-        <div class="flex flex-col sm:flex-row gap-6 w-full max-w-lg fade-in" style="animation-delay: 0.1s;">
-            <button onclick="UI.navigate('admin-login')" class="flex-1 bg-[#0f172a] border border-[#1e293b] hover:border-amber-500/50 rounded-2xl p-8 transition-all group shadow-lg">
-                <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mb-4 group-hover:bg-amber-500/10 group-hover:text-amber-500 text-slate-400 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                </div>
-                <h2 class="text-xl font-bold text-white group-hover:text-amber-500 text-left">Admin Portal</h2>
-                <p class="text-slate-500 text-sm mt-2 text-left">Full access & monitoring</p>
+        <div class="flex flex-col sm:flex-row gap-5 w-full max-w-md fade-in">
+            <button onclick="UI.navigate('admin-login')" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-500 rounded-2xl p-6 text-left transition-all shadow-sm group">
+                <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3 group-hover:text-amber-500 transition-colors">👑</div>
+                <h2 class="font-bold text-base group-hover:text-amber-500">Admin Portal</h2>
+                <p class="text-slate-500 text-xs mt-1">Management & monitoring</p>
             </button>
-            <button onclick="UI.navigate('agent-login')" class="flex-1 bg-[#0f172a] border border-[#1e293b] hover:border-amber-500/50 rounded-2xl p-8 transition-all group shadow-lg">
-                <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mb-4 group-hover:bg-amber-500/10 group-hover:text-amber-500 text-slate-400 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                </div>
-                <h2 class="text-xl font-bold text-white group-hover:text-amber-500 text-left">Agent Portal</h2>
-                <p class="text-slate-500 text-sm mt-2 text-left">Chat with your clients</p>
+            <button onclick="UI.navigate('agent-login')" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-500 rounded-2xl p-6 text-left transition-all shadow-sm group">
+                <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3 group-hover:text-amber-500 transition-colors">🎧</div>
+                <h2 class="font-bold text-base group-hover:text-amber-500">Agent Portal</h2>
+                <p class="text-slate-500 text-xs mt-1">Live client support</p>
             </button>
         </div>
     </div>
 
     <!-- View: Admin Login -->
     <div id="view-admin-login" class="view items-center justify-center p-4 relative">
-        <button onclick="UI.navigate('landing')" class="absolute top-6 left-6 text-slate-500 hover:text-white flex items-center gap-2 bg-slate-900 px-4 py-2 rounded-lg border border-slate-800">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Back
-        </button>
-        <div class="w-full max-w-sm bg-[#0f172a] border border-[#1e293b] rounded-2xl p-8 shadow-2xl fade-in">
-            <h2 class="text-2xl font-bold text-white mb-2 text-center">Admin Access</h2>
-            <p class="text-slate-500 text-xs text-center mb-6">Demo: admin / password123</p>
+        <button onclick="UI.navigate('landing')" class="absolute top-6 left-6 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center gap-2 text-xs font-semibold bg-slate-200 dark:bg-slate-800 px-3.5 py-2 rounded-xl">← Back</button>
+        <div class="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl fade-in">
+            <h2 class="text-xl font-bold mb-1 text-center">Admin Secure Login</h2>
+            <p class="text-slate-500 text-xs text-center mb-6">Enter system admin credentials</p>
             <form id="form-admin-login" class="space-y-4">
-                <input type="text" id="admin-user" class="w-full input-dark px-4 py-3.5 rounded-xl text-sm" placeholder="Username" required>
-                <input type="password" id="admin-pwd" class="w-full input-dark px-4 py-3.5 rounded-xl text-sm" placeholder="Password" required>
-                <button type="submit" class="w-full btn-primary py-3.5 rounded-xl text-sm mt-2">Login to Dashboard</button>
+                <input type="text" id="admin-user" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3.5 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Username" required>
+                <input type="password" id="admin-pwd" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3.5 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Password" required>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-3.5 rounded-xl text-sm transition-all shadow-md">Login Dashboard</button>
             </form>
         </div>
     </div>
 
     <!-- View: Agent Login -->
     <div id="view-agent-login" class="view items-center justify-center p-4 relative">
-        <button onclick="UI.navigate('landing')" class="absolute top-6 left-6 text-slate-500 hover:text-white flex items-center gap-2 bg-slate-900 px-4 py-2 rounded-lg border border-slate-800">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Back
-        </button>
-        <div class="w-full max-w-sm bg-[#0f172a] border border-[#1e293b] rounded-2xl p-8 shadow-2xl fade-in">
-            <h2 class="text-2xl font-bold text-white mb-2 text-center">Agent Login</h2>
-            <p class="text-slate-500 text-xs text-center mb-6">Use credentials provided by admin</p>
+        <button onclick="UI.navigate('landing')" class="absolute top-6 left-6 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center gap-2 text-xs font-semibold bg-slate-200 dark:bg-slate-800 px-3.5 py-2 rounded-xl">← Back</button>
+        <div class="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl fade-in">
+            <h2 class="text-xl font-bold mb-1 text-center">Agent Login</h2>
+            <p class="text-slate-500 text-xs text-center mb-6">Sign in with your assigned credentials</p>
             <form id="form-agent-login" class="space-y-4">
-                <input type="text" id="agent-user" class="w-full input-dark px-4 py-3.5 rounded-xl text-sm" placeholder="Agent Username" required>
-                <input type="password" id="agent-pwd" class="w-full input-dark px-4 py-3.5 rounded-xl text-sm" placeholder="Password" required>
-                <button type="submit" class="w-full btn-primary py-3.5 rounded-xl text-sm mt-2">Access Workspace</button>
+                <input type="text" id="agent-user" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3.5 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Agent Username" required>
+                <input type="password" id="agent-pwd" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3.5 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Password" required>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-3.5 rounded-xl text-sm transition-all shadow-md">Access Workspace</button>
             </form>
         </div>
     </div>
 
     <!-- View: Admin Dashboard -->
-    <div id="view-admin-dash" class="view bg-slate-950 flex-row">
-        <!-- Sidebar Navigation -->
-        <nav class="w-16 md:w-64 bg-[#0f172a] border-r border-[#1e293b] flex flex-col shrink-0 z-20 transition-all">
-            <div class="h-16 flex items-center justify-center md:justify-start md:px-6 border-b border-[#1e293b]">
-                <div class="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center text-black md:mr-3 shadow-lg shadow-amber-500/20">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                </div>
-                <span class="font-bold text-white hidden md:block tracking-wide">Admin HQ</span>
+    <div id="view-admin-dash" class="view bg-slate-50 dark:bg-slate-950 flex-row">
+        <!-- Sidebar -->
+        <nav class="w-16 md:w-60 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0 z-20">
+            <div class="h-16 flex items-center justify-between px-4 md:px-6 border-b border-slate-200 dark:border-slate-800">
+                <span class="font-bold text-sm hidden md:block">Admin HQ</span>
+                <button onclick="UI.toggleTheme()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs">🌓</button>
             </div>
-            <div class="flex-1 py-6 flex flex-col gap-2 px-2 md:px-4 overflow-y-auto">
-                <button onclick="UI.switchAdminTab('agents')" id="tab-btn-agents" class="p-3 md:px-4 md:py-3.5 rounded-xl text-left bg-slate-800 text-white flex items-center gap-3 transition-colors">
-                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                    <span class="hidden md:block font-medium">Manage Agents</span>
+            <div class="flex-1 py-4 flex flex-col gap-1.5 px-3">
+                <button onclick="UI.switchAdminTab('agents')" id="tab-btn-agents" class="p-3 rounded-xl text-left bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center gap-3 font-medium text-sm">
+                    <span>👥</span> <span class="hidden md:inline">Agents</span>
                 </button>
-                <button onclick="UI.switchAdminTab('monitor')" id="tab-btn-monitor" class="p-3 md:px-4 md:py-3.5 rounded-xl text-left text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-3 transition-colors">
-                    <svg class="w-5 h-5 shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                    <span class="hidden md:block font-medium">Monitor & Chat</span>
+                <button onclick="UI.switchAdminTab('monitor')" id="tab-btn-monitor" class="p-3 rounded-xl text-left text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 font-medium text-sm">
+                    <span>📊</span> <span class="hidden md:inline">Monitor & Clients</span>
                 </button>
             </div>
-            <div class="p-4 border-t border-[#1e293b]">
-                <button onclick="app.logout()" class="w-full p-3 flex items-center justify-center gap-2 text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors">
-                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                    <span class="hidden md:inline font-medium">Logout</span>
-                </button>
+            <div class="p-3 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-2">
+                <button onclick="UI.openModal('admin-pwd')" class="w-full py-2.5 px-3 text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-center">Change Password</button>
+                <button onclick="app.logout()" class="w-full py-2.5 px-3 text-xs font-semibold text-red-500 hover:bg-red-500/10 rounded-xl text-center">Logout</button>
             </div>
         </nav>
 
-        <!-- Admin Tab: Manage Agents -->
+        <!-- Tab: Agents Management -->
         <div id="admin-tab-agents" class="flex-1 flex flex-col h-full overflow-hidden">
-            <div class="h-16 border-b border-[#1e293b] bg-slate-900/50 flex items-center px-8 shrink-0">
-                <h2 class="font-bold text-white text-lg">Agent Directory</h2>
+            <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 flex items-center justify-between px-6 shrink-0">
+                <h2 class="font-bold text-base">Agent Management & Availability</h2>
             </div>
-            <div class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
-                <div class="max-w-6xl mx-auto space-y-8">
-                    <!-- Create Agent Form -->
-                    <div class="bg-[#0f172a] border border-[#1e293b] rounded-2xl p-6 shadow-lg">
-                        <div class="flex items-center gap-2 mb-5">
-                            <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-amber-500">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                            </div>
-                            <h3 class="font-bold text-white">Create New Agent</h3>
-                        </div>
-                        <form id="form-create-agent" class="flex flex-col md:flex-row gap-4">
-                            <input type="text" id="new-agt-name" placeholder="Agent Full Name" class="flex-1 input-dark px-4 py-3 rounded-xl text-sm" required>
-                            <input type="text" id="new-agt-user" placeholder="Login Username" class="flex-1 input-dark px-4 py-3 rounded-xl text-sm" required>
-                            <input type="text" id="new-agt-pwd" placeholder="Login Password" class="flex-1 input-dark px-4 py-3 rounded-xl text-sm" required>
-                            <button type="submit" class="btn-primary px-8 py-3 rounded-xl text-sm shrink-0 shadow-lg">Create Agent</button>
-                        </form>
-                    </div>
-                    
-                    <!-- Agents Table -->
-                    <div class="bg-[#0f172a] border border-[#1e293b] rounded-2xl overflow-hidden shadow-lg">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm whitespace-nowrap">
-                                <thead class="bg-slate-800/80 text-slate-400 text-xs uppercase font-semibold tracking-wider">
-                                    <tr>
-                                        <th class="px-6 py-4">Agent Name</th>
-                                        <th class="px-6 py-4">Username</th>
-                                        <th class="px-6 py-4">Status</th>
-                                        <th class="px-6 py-4 text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-agents-list" class="divide-y divide-[#1e293b]">
-                                    <!-- Rendered dynamically -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+            <div class="flex-1 overflow-y-auto p-6 space-y-6">
+                <!-- Create Agent -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+                    <h3 class="font-bold text-sm mb-4">Create New Agent</h3>
+                    <form id="form-create-agent" class="flex flex-col md:flex-row gap-3">
+                        <input type="text" id="new-agt-name" placeholder="Full Name" class="flex-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none" required>
+                        <input type="text" id="new-agt-user" placeholder="Username" class="flex-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none" required>
+                        <input type="password" id="new-agt-pwd" placeholder="Password" class="flex-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none" required>
+                        <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-black font-semibold px-6 py-3 rounded-xl text-sm transition-all shadow-sm">Create</button>
+                    </form>
+                </div>
+                <!-- Agents Table -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <tr class="bg-slate-100 dark:bg-slate-800/50 text-slate-500 text-xs uppercase font-semibold">
+                            <th class="px-5 py-3.5">Agent</th>
+                            <th class="px-5 py-3.5">Status / Availability</th>
+                            <th class="px-5 py-3.5">Last Login / Logout</th>
+                            <th class="px-5 py-3.5 text-right">Actions</th>
+                        </tr>
+                        <tbody id="admin-agents-list" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <!-- Admin Tab: Live Monitor -->
-        <div id="admin-tab-monitor" class="flex-1 flex flex-col md:flex-row h-full overflow-hidden hidden">
-            <!-- Column 1: Agents list for filtering -->
-            <div class="w-full md:w-64 border-r border-[#1e293b] bg-[#0f172a] flex flex-col shrink-0 h-[25vh] md:h-full z-10 shadow-md">
-                <div class="p-3 border-b border-[#1e293b] bg-slate-900 text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center justify-between">
-                    <span>Filter by Agent</span>
-                    <button onclick="app.adminSelectAgent(null)" class="text-amber-500 hover:text-amber-400">View All</button>
-                </div>
-                <div class="flex-1 overflow-y-auto custom-scrollbar" id="monitor-agent-list"></div>
+        <!-- Tab: Monitor & Client Export -->
+        <div id="admin-tab-monitor" class="flex-1 flex flex-col h-full overflow-hidden hidden">
+            <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 flex items-center justify-between px-6 shrink-0">
+                <h2 class="font-bold text-base">Signed-In Users Directory</h2>
+                <button onclick="app.exportClientsExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-sm">
+                    📥 Download Excel (CSV)
+                </button>
             </div>
-            
-            <!-- Column 2: Clients List -->
-            <div class="w-full md:w-72 border-r border-[#1e293b] bg-[#0f172a] flex flex-col shrink-0 h-[25vh] md:h-full z-10">
-                <div class="p-3 border-b border-[#1e293b] bg-slate-900 flex justify-between items-center">
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Active Clients</span>
-                    <span class="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-300" id="monitor-client-count">0 Total</span>
-                </div>
-                <div class="flex-1 overflow-y-auto custom-scrollbar" id="monitor-client-list">
-                    <!-- Populated dynamically -->
-                </div>
-            </div>
-            
-            <!-- Column 3: Full Intervention Chat -->
-            <div class="flex-1 bg-slate-950 flex flex-col h-[50vh] md:h-full relative">
-                <div class="h-16 border-b border-[#1e293b] bg-slate-900 flex items-center px-6 shrink-0 shadow-sm z-10">
-                    <div class="flex items-center gap-3">
-                        <span class="flex h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
-                        <span class="text-xs font-bold text-red-500 tracking-wider">ADMIN INTERVENTION</span>
-                    </div>
-                    <div class="ml-auto text-sm text-white font-medium flex items-center gap-4" id="monitor-chat-header-info">
-                        Select a client to monitor/chat
-                    </div>
-                </div>
-                
-                <div class="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4 custom-scrollbar" id="monitor-chat-view">
-                    <!-- Chat messages -->
-                </div>
-
-                <!-- Admin Reply Input -->
-                <div class="p-4 bg-[#0f172a] border-t border-[#1e293b] shrink-0 hidden" id="monitor-chat-input-area">
-                    <form id="form-admin-msg" class="flex gap-3 max-w-5xl mx-auto">
-                        <div class="bg-red-500/10 text-red-500 text-[10px] font-bold uppercase flex items-center px-3 rounded-xl border border-red-500/20 shrink-0">Admin Mode</div>
-                        <input type="text" id="admin-input-text" class="flex-1 input-dark px-5 py-3.5 rounded-xl text-sm" placeholder="Send a message directly to this client..." autocomplete="off">
-                        <button type="submit" class="bg-red-600 hover:bg-red-500 text-white font-bold w-14 rounded-xl flex items-center justify-center shrink-0 shadow-lg transition-all">
-                            <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                        </button>
-                    </form>
+            <div class="flex-1 overflow-y-auto p-6">
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <tr class="bg-slate-100 dark:bg-slate-800/50 text-slate-500 text-xs uppercase font-semibold">
+                            <th class="px-5 py-3.5">Client Name</th>
+                            <th class="px-5 py-3.5">Phone Number</th>
+                            <th class="px-5 py-3.5">Assigned Agent</th>
+                            <th class="px-5 py-3.5">Joined Time</th>
+                        </tr>
+                        <tbody id="admin-clients-list" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- View: Agent Dashboard -->
-    <div id="view-agent-dash" class="view bg-slate-950 flex-row">
-        <!-- Sidebar: Clients list -->
-        <div class="w-full md:w-80 border-r border-[#1e293b] bg-[#0f172a] flex flex-col h-full shrink-0 transition-transform duration-300 absolute md:relative z-30 shadow-2xl md:shadow-none -translate-x-full md:translate-x-0" id="agent-sidebar">
-            <div class="p-5 border-b border-[#1e293b] flex flex-col gap-4 shrink-0 bg-slate-900">
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-amber-500 font-bold border border-slate-700" id="agent-dash-initial">A</div>
-                        <div>
-                            <h2 class="font-bold text-white text-sm" id="agent-dash-name">Agent</h2>
-                            <span class="text-[10px] text-green-500 font-medium tracking-wide">● ONLINE</span>
-                        </div>
-                    </div>
-                    <button onclick="app.logout()" class="text-xs text-slate-400 bg-slate-800 hover:bg-slate-700 hover:text-white px-3 py-1.5 rounded-lg transition-colors">Logout</button>
-                </div>
-                
-                <!-- The Important Invite Link Area -->
-                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 shadow-inner">
-                    <p class="text-[10px] text-slate-400 font-semibold mb-1 uppercase tracking-wider">Your Unique Invite Link</p>
-                    <div class="flex items-center gap-2">
-                        <input type="text" id="agent-invite-link" class="w-full bg-transparent text-amber-500 text-xs outline-none" readonly>
-                        <button onclick="UI.copyLink('agent-invite-link')" class="text-xs bg-amber-500 text-black px-3 py-1.5 rounded font-bold hover:bg-amber-400 shrink-0 shadow-md">Copy</button>
+    <div id="view-agent-dash" class="view bg-slate-50 dark:bg-slate-950 flex-row">
+        <!-- Sidebar: Client List -->
+        <div class="w-full md:w-80 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full shrink-0 absolute md:relative z-30 -translate-x-full md:translate-x-0 transition-transform" id="agent-sidebar">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex justify-between items-center">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-full bg-amber-500 text-black font-bold flex items-center justify-center text-sm" id="agent-dash-initial">A</div>
+                    <div>
+                        <h2 class="font-bold text-xs" id="agent-dash-name">Agent</h2>
+                        <span class="text-[10px] text-emerald-500 font-semibold">● ONLINE</span>
                     </div>
                 </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="UI.toggleTheme()" class="p-2 rounded-lg bg-slate-200 dark:bg-slate-800 text-xs">🌓</button>
+                    <button onclick="app.logout()" class="text-xs text-slate-500 hover:text-red-500 px-2.5 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800">Logout</button>
+                </div>
             </div>
-            
-            <div class="p-3 bg-slate-900/50 text-xs font-bold text-slate-400 uppercase tracking-widest shrink-0 border-b border-[#1e293b] flex justify-between items-center">
-                <span>My Clients</span>
-                <span id="agent-client-count" class="bg-slate-800 px-2 py-0.5 rounded text-[10px]">0</span>
+            <div class="p-3 border-b border-slate-200 dark:border-slate-800">
+                <p class="text-[10px] font-semibold text-slate-400 mb-1 uppercase">Exclusive Invite Link</p>
+                <div class="flex gap-2">
+                    <input type="text" id="agent-invite-link" class="w-full bg-slate-100 dark:bg-slate-800 text-amber-500 text-[11px] px-2 py-1 rounded outline-none" readonly>
+                    <button onclick="UI.copyLink('agent-invite-link')" class="bg-amber-500 hover:bg-amber-400 text-black text-xs px-2.5 py-1 rounded font-bold">Copy</button>
+                </div>
             </div>
-            <div class="flex-1 overflow-y-auto custom-scrollbar" id="agent-client-list">
-                <!-- Populated dynamically -->
-            </div>
+            <div class="flex-1 overflow-y-auto divide-y divide-slate-200 dark:divide-slate-800" id="agent-client-list"></div>
         </div>
 
-        <!-- Main Chat Area for Agent -->
-        <div class="flex-1 flex flex-col h-full relative z-10 bg-[#020617]">
-            <div class="h-16 border-b border-[#1e293b] bg-slate-900 flex items-center px-4 shrink-0 shadow-sm z-10" id="agent-chat-header">
-                <button onclick="document.getElementById('agent-sidebar').classList.remove('-translate-x-full')" class="md:hidden mr-4 text-slate-400 hover:text-white p-2 bg-slate-800 rounded-lg">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                </button>
-                <div class="flex items-center gap-3 hidden" id="agent-active-client-info">
-                    <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-white font-bold border border-slate-700" id="agent-chat-initial">C</div>
-                    <div>
-                        <h3 class="font-bold text-white text-sm" id="agent-chat-title">Client Name</h3>
-                        <p class="text-xs text-amber-500 font-mono" id="agent-chat-subtitle">Phone Number</p>
+        <!-- Chat Panel -->
+        <div class="flex-1 flex flex-col h-full bg-white dark:bg-slate-950 relative">
+            <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center px-4 justify-between shrink-0 z-10">
+                <div class="flex items-center gap-3">
+                    <button onclick="document.getElementById('agent-sidebar').classList.remove('-translate-x-full')" class="md:hidden text-lg">☰</button>
+                    <div id="agent-active-client-info" class="flex items-center gap-3 hidden">
+                        <div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-bold text-sm" id="agent-chat-initial">C</div>
+                        <div>
+                            <h3 class="font-bold text-xs" id="agent-chat-title">Client</h3>
+                            <p class="text-[10px] text-amber-500" id="agent-chat-subtitle">Phone</p>
+                        </div>
                     </div>
+                    <div id="agent-no-client-info" class="text-xs text-slate-500 font-medium">Select a client chat</div>
                 </div>
-                <div id="agent-no-client-info" class="text-slate-400 font-medium text-sm">
-                    Select a client from the sidebar
+                <div id="agent-chat-actions" class="hidden flex items-center gap-2">
+                    <button id="btn-mute-chat" onclick="app.toggleMuteActiveClient()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold rounded-xl">Mute Chat 🔔</button>
                 </div>
             </div>
-            
-            <div class="flex-1 p-4 md:p-6 overflow-y-auto flex flex-col gap-4 custom-scrollbar" id="agent-chat-messages">
-                <div class="h-full flex flex-col items-center justify-center text-slate-500 text-sm gap-4">
-                    <div class="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center border border-slate-800">
-                        <svg class="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                    </div>
-                    Waiting for client selection
-                </div>
+
+            <div class="flex-1 p-4 overflow-y-auto flex flex-col gap-3" id="agent-chat-messages">
+                <div class="h-full flex items-center justify-center text-xs text-slate-400">Select a conversation from sidebar</div>
             </div>
-            
-            <div class="p-4 bg-[#0f172a] border-t border-[#1e293b] shrink-0 hidden" id="agent-chat-input-area">
-                <form id="form-agent-msg" class="flex gap-3 max-w-4xl mx-auto">
-                    <input type="text" id="agent-input-text" class="flex-1 input-dark px-5 py-3.5 rounded-xl text-sm shadow-inner" placeholder="Type your reply here..." autocomplete="off">
-                    <button type="submit" class="btn-primary w-14 rounded-xl flex items-center justify-center shrink-0 shadow-lg">
-                        <svg class="w-6 h-6 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                    </button>
+
+            <div class="p-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 hidden" id="agent-chat-input-area">
+                <form id="form-agent-msg" class="flex gap-2 max-w-4xl mx-auto">
+                    <input type="text" id="agent-input-text" class="flex-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Type reply..." autocomplete="off">
+                    <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-black font-bold px-5 py-3 rounded-xl text-sm">Send</button>
                 </form>
             </div>
         </div>
     </div>
 
     <!-- View: Client Onboarding -->
-    <div id="view-client-onboard" class="view items-center justify-center p-4 bg-slate-950">
-        <div class="w-full max-w-md bg-[#0f172a] border border-[#1e293b] rounded-3xl p-8 shadow-2xl fade-in text-center relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-amber-600 to-yellow-400"></div>
-            
-            <div class="w-16 h-16 mx-auto bg-slate-900 rounded-full flex items-center justify-center mb-6 border-2 border-slate-800 shadow-inner">
-                <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-            </div>
-            
-            <h2 class="text-2xl font-bold text-white mb-1">Live Support</h2>
-            <p class="text-sm text-slate-400 mb-8">You are connecting with <span id="client-agent-name" class="text-amber-500 font-semibold px-2 py-0.5 bg-amber-500/10 rounded">Support</span></p>
-            
-            <form id="form-client-onboard" class="space-y-5">
-                <div class="text-left">
-                    <label class="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider ml-1">Your Full Name</label>
-                    <input type="text" id="client-name" class="w-full input-dark px-5 py-4 rounded-xl text-sm" placeholder="e.g. Rahul Kumar" required>
+    <div id="view-client-onboard" class="view items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
+        <div class="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl fade-in text-center">
+            <h2 class="text-xl font-bold mb-1">Live Support Secure</h2>
+            <p class="text-xs text-slate-500 mb-6">Connecting with <span id="client-agent-name" class="text-amber-500 font-bold">Agent</span></p>
+            <form id="form-client-onboard" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Your Full Name</label>
+                    <input type="text" id="client-name" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none" required>
                 </div>
-                <div class="text-left">
-                    <label class="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider ml-1">Your Phone Number</label>
-                    <input type="tel" id="client-phone" class="w-full input-dark px-5 py-4 rounded-xl text-sm" placeholder="e.g. +91 9876543210" required>
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Phone Number</label>
+                    <input type="tel" id="client-phone" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none" required>
                 </div>
-                <button type="submit" class="w-full btn-primary py-4 rounded-xl text-sm font-bold shadow-lg shadow-amber-500/20 mt-4 flex items-center justify-center gap-2" id="btn-client-start">
-                    Start Secure Chat
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                </button>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-3.5 rounded-xl text-sm transition-all shadow-md mt-2">Start Chat</button>
             </form>
         </div>
     </div>
 
     <!-- View: Client Chat -->
-    <div id="view-client-chat" class="view bg-slate-950">
-        <div class="h-16 border-b border-[#1e293b] bg-[#0f172a] flex items-center px-4 shrink-0 justify-between shadow-md z-10">
+    <div id="view-client-chat" class="view bg-slate-50 dark:bg-slate-950">
+        <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center px-4 justify-between shrink-0 shadow-sm">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center text-amber-500 font-bold border border-slate-700 relative">
-                    <span id="client-header-initial">A</span>
-                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#0f172a] rounded-full"></div>
+                <div class="w-9 h-9 rounded-full bg-amber-500 text-black font-bold flex items-center justify-center text-sm relative">
+                    <span id="client-header-initial">S</span>
+                    <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
                 </div>
                 <div>
-                    <h3 class="font-bold text-white text-sm" id="client-header-name">Support Team</h3>
-                    <p class="text-[10px] text-green-500 font-medium">Online • Usually replies instantly</p>
+                    <h3 class="font-bold text-xs" id="client-header-name">Support Team</h3>
+                    <p class="text-[10px] text-emerald-500 font-semibold">● Online</p>
                 </div>
             </div>
-            <div class="text-[10px] bg-slate-800 text-slate-400 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 uppercase tracking-wider font-bold">
-                <svg class="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg> Secure
-            </div>
-        </div>
-        
-        <div class="flex-1 p-4 md:p-6 overflow-y-auto flex flex-col gap-4 custom-scrollbar" id="client-chat-messages">
-            <!-- Messages inserted here -->
+            <button onclick="UI.toggleTheme()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs">🌓</button>
         </div>
 
-        <div class="p-3 md:p-4 bg-[#0f172a] border-t border-[#1e293b] shrink-0">
-            <form id="form-client-msg" class="flex gap-2 md:gap-3 max-w-4xl mx-auto">
-                <input type="text" id="client-input-text" class="flex-1 input-dark px-5 py-3.5 rounded-xl text-sm shadow-inner" placeholder="Type your message..." autocomplete="off">
-                <button type="submit" class="btn-primary w-14 rounded-xl flex items-center justify-center shrink-0 shadow-lg">
-                    <svg class="w-6 h-6 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                </button>
+        <div class="flex-1 p-4 overflow-y-auto flex flex-col gap-3" id="client-chat-messages"></div>
+
+        <div class="p-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
+            <form id="form-client-msg" class="flex gap-2 max-w-4xl mx-auto">
+                <input type="text" id="client-input-text" class="flex-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Type message..." autocomplete="off">
+                <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-black font-bold px-5 py-3 rounded-xl text-sm">Send</button>
             </form>
         </div>
     </div>
@@ -412,8 +309,7 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, updateDoc, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Environment variables & Clean Firebase Configuration
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'support-crm-pro';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'support-crm-secure-v2';
         const firebaseConfig = {
             apiKey: "AIzaSyAwFk3Nr7pVorxDaBv042HIo1y4B4nS1qU",
             authDomain: "portal-80bff.firebaseapp.com",
@@ -424,170 +320,163 @@
         };
         const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // Central State
         const state = {
-            db: null, auth: null, user: null,
-            role: null, // 'admin', 'agent', 'client'
-            agents: [], clients: [], messages: [],
-            
-            myAgentId: null, myClientId: null, targetAgentId: null, // Routing
-            
-            adminSelectedAgent: null, // null means view all
-            adminSelectedClient: null,
-            agentSelectedClient: null,
-            
+            db: null, auth: null, user: null, role: null,
+            agents: [], clients: [], messages: [], mutes: {},
+            targetAgentId: null, myAgentId: null, myClientId: null,
+            adminSelectedClient: null, agentSelectedClient: null,
             unsubscribers: []
         };
 
-        // UI Helpers
         window.UI = {
-            navigate: (viewId) => {
+            navigate: (id) => {
                 document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-                document.getElementById(`view-${viewId}`).classList.add('active');
+                document.getElementById(`view-${id}`).classList.add('active');
             },
-            showToast: (msg, isError = false) => {
+            showToast: (msg, isErr = false) => {
                 const t = document.getElementById('toast');
                 t.textContent = msg;
-                t.className = `fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-xl shadow-2xl z-[100] flex items-center gap-2 text-sm font-medium transition-all duration-300 border ${isError ? 'bg-red-950/90 text-red-200 border-red-800' : 'bg-emerald-950/90 text-emerald-200 border-emerald-800'}`;
+                t.className = `fixed top-5 left-1/2 transform -translate-x-1/2 px-5 py-3 rounded-xl shadow-2xl z-[150] flex items-center gap-3 text-sm font-medium border transition-all ${isErr ? 'bg-red-950 text-red-200 border-red-800' : 'bg-slate-900 text-slate-100 border-slate-700'}`;
                 t.classList.remove('hidden');
                 setTimeout(() => t.classList.add('hidden'), 3000);
+            },
+            toggleTheme: () => {
+                const isDark = document.documentElement.classList.toggle('dark');
+                localStorage.setItem('crm_theme', isDark ? 'dark' : 'light');
             },
             switchAdminTab: (tab) => {
                 document.getElementById('admin-tab-agents').classList.toggle('hidden', tab !== 'agents');
                 document.getElementById('admin-tab-monitor').classList.toggle('hidden', tab !== 'monitor');
-                const active = 'p-3 md:px-4 md:py-3.5 rounded-xl text-left bg-slate-800 text-white flex items-center gap-3 transition-colors';
-                const inactive = 'p-3 md:px-4 md:py-3.5 rounded-xl text-left text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-3 transition-colors';
-                document.getElementById('tab-btn-agents').className = tab === 'agents' ? active : inactive;
-                document.getElementById('tab-btn-monitor').className = tab === 'monitor' ? active : inactive;
-                if(tab === 'monitor') { renderMonitorAgents(); renderMonitorClients(); }
+                document.getElementById('tab-btn-agents').className = tab === 'agents' ? 'p-3 rounded-xl text-left bg-amber-500/10 text-amber-500 flex items-center gap-3 font-medium text-sm' : 'p-3 rounded-xl text-left text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 font-medium text-sm';
+                document.getElementById('tab-btn-monitor').className = tab === 'monitor' ? 'p-3 rounded-xl text-left bg-amber-500/10 text-amber-500 flex items-center gap-3 font-medium text-sm' : 'p-3 rounded-xl text-left text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 font-medium text-sm';
             },
             formatTime: (ts) => ts ? new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
-            escape: (str) => { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; },
+            escape: (str) => { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; },
             scrollBottom: (id) => { const el = document.getElementById(id); if(el) setTimeout(() => el.scrollTop = el.scrollHeight, 50); },
-            copyLink: (id) => {
-                const el = document.getElementById(id);
-                el.select(); document.execCommand('copy');
-                UI.showToast("Link copied to clipboard!");
-            },
-            openModal: (id) => { document.getElementById(`modal-${id}`).classList.remove('hidden'); },
-            closeModal: (id) => { document.getElementById(`modal-${id}`).classList.add('hidden'); }
+            openModal: (id) => document.getElementById(`modal-${id}`).classList.remove('hidden'),
+            closeModal: (id) => document.getElementById(`modal-${id}`).classList.add('hidden'),
+            copyLink: (id) => { document.getElementById(id).select(); document.execCommand('copy'); UI.showToast("Invite link copied!"); }
         };
 
-        // RULE 1: Strict Paths
+        if(localStorage.getItem('crm_theme') === 'light') document.documentElement.classList.remove('dark');
+
         const getPath = (col) => `artifacts/${appId}/public/data/${col}`;
 
         async function initApp() {
             try {
-                if(!firebaseConfig.apiKey) throw new Error("No Config");
-
                 const app = initializeApp(firebaseConfig);
                 state.auth = getAuth(app);
                 state.db = getFirestore(app);
-
-                // RULE 3: Auth first
                 if (authToken) await signInWithCustomToken(state.auth, authToken);
                 else await signInAnonymously(state.auth);
                 state.user = state.auth.currentUser;
 
                 startRealtimeSync();
 
-                // URL Routing Check (Client Link)
                 const urlParams = new URLSearchParams(window.location.search);
                 state.targetAgentId = urlParams.get('agent');
 
                 setTimeout(() => {
                     if (state.targetAgentId) handleClientRouting();
                     else UI.navigate('landing');
-                }, 1000);
-
+                }, 800);
             } catch (err) {
-                console.error("Init Error", err);
-                document.getElementById('view-loading').innerHTML = `<div class="text-red-500 font-bold">Failed to connect database environment.</div>`;
+                console.error(err);
+                document.getElementById('view-loading').innerHTML = `<div class="text-red-500 text-xs">Connection initialization error.</div>`;
             }
         }
 
-        // RULE 2: No Complex Queries. Fetch all, filter in memory.
         function startRealtimeSync() {
             if(!state.user) return;
             state.unsubscribers.forEach(u => u()); state.unsubscribers = [];
 
             const unsubAgents = onSnapshot(collection(state.db, getPath('agents')), snap => {
                 state.agents = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                if(state.role === 'admin') { renderAdminAgents(); renderMonitorAgents(); }
+                if(state.role === 'admin') renderAdminAgents();
                 if(!state.role && state.targetAgentId) handleClientRouting();
-            }, err => console.error("Agent sync error", err));
-            
+            });
+
             const unsubClients = onSnapshot(collection(state.db, getPath('clients')), snap => {
-                let clist = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                clist.sort((a,b) => (b.lastMessageTime||0) - (a.lastMessageTime||0)); 
-                state.clients = clist;
-                if(state.role === 'admin') renderMonitorClients();
+                state.clients = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => (b.lastMessageTime||0)-(a.lastMessageTime||0));
+                if(state.role === 'admin') renderAdminClients();
                 if(state.role === 'agent') renderAgentClients();
-            }, err => console.error("Client sync error", err));
+            });
 
             const unsubMessages = onSnapshot(collection(state.db, getPath('messages')), snap => {
-                let mlist = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                mlist.sort((a,b) => a.timestamp - b.timestamp);
-                state.messages = mlist;
-                if(state.role === 'admin') renderMonitorChat();
-                if(state.role === 'agent') renderAgentChat();
+                const newMsgs = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => a.timestamp-b.timestamp);
+                
+                // Check if agent got a new message for notification/unread
+                if(state.role === 'agent' && state.myAgentId && newMsgs.length > state.messages.length) {
+                    const latest = newMsgs[newMsgs.length - 1];
+                    if(latest.sender === 'client' && latest.agentId === state.myAgentId) {
+                        if(latest.clientId !== state.agentSelectedClient && !state.mutes[latest.clientId]) {
+                            UI.showToast("New message received!");
+                        }
+                    }
+                }
+
+                state.messages = newMsgs;
+                if(state.role === 'agent') { renderAgentClients(); renderAgentChat(); }
                 if(state.role === 'client') renderClientChat();
-            }, err => console.error("Msg sync error", err));
+            });
 
             state.unsubscribers.push(unsubAgents, unsubClients, unsubMessages);
         }
 
         window.app = {
-            logout: () => {
+            logout: async () => {
+                if(state.role === 'agent' && state.myAgentId) {
+                    try { await updateDoc(doc(state.db, getPath('agents'), state.myAgentId), { status: 'offline', lastLogout: Date.now() }); } catch(e){}
+                }
                 state.role = null; state.myAgentId = null; state.myClientId = null;
-                state.adminSelectedAgent = null; state.agentSelectedClient = null; state.adminSelectedClient = null;
                 UI.navigate('landing');
             },
-            
-            /* ADMIN: Toggle Agent */
-            toggleAgentStatus: async (agentId, currentStatus) => {
-                if(state.role !== 'admin') return;
-                const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-                try {
-                    await updateDoc(doc(state.db, getPath('agents'), agentId), { status: newStatus });
-                    UI.showToast(`Agent marked as ${newStatus}`);
-                } catch(err) { UI.showToast("Failed to update status", true); }
+
+            updateAdminPassword: async () => {
+                const oldP = document.getElementById('admin-old-pwd').value;
+                const newP = document.getElementById('admin-new-pwd').value;
+                if(!oldP || !newP) { UI.showToast("Fill all fields", true); return; }
+                const savedOld = localStorage.getItem('crm_admin_pwd') || 'password123';
+                if(oldP !== savedOld) { UI.showToast("Incorrect current password", true); return; }
+                localStorage.setItem('crm_admin_pwd', newP);
+                UI.closeModal('admin-pwd');
+                UI.showToast("Admin password updated successfully!");
             },
-            
-            /* ADMIN: Reset Password Flow */
-            openResetPassword: (agentId, agentName) => {
-                if(state.role !== 'admin') return;
-                document.getElementById('modal-pwd-agent-id').value = agentId;
-                document.getElementById('modal-pwd-agent-name').textContent = `For agent: ${agentName}`;
-                document.getElementById('modal-pwd-new').value = '';
-                UI.openModal('pwd-reset');
-            },
+
             confirmResetPassword: async () => {
                 const id = document.getElementById('modal-pwd-agent-id').value;
                 const pwd = document.getElementById('modal-pwd-new').value.trim();
-                if(!pwd || pwd.length < 4) { UI.showToast("Password too short", true); return; }
-                
+                if(!pwd) return;
                 try {
                     await updateDoc(doc(state.db, getPath('agents'), id), { password: pwd });
                     UI.closeModal('pwd-reset');
-                    UI.showToast("Password updated successfully!");
-                } catch(err) { UI.showToast("Failed to update password", true); }
+                    UI.showToast("Agent password reset successfully!");
+                } catch(e) { UI.showToast("Failed to reset password", true); }
             },
 
-            /* ADMIN: Selection */
-            adminSelectAgent: (agentId) => {
-                state.adminSelectedAgent = agentId; // null = all
-                state.adminSelectedClient = null; 
-                renderMonitorAgents(); renderMonitorClients(); renderMonitorChat();
+            exportClientsExcel: () => {
+                let csv = "Client Name,Phone Number,Assigned Agent,Joined Time\n";
+                state.clients.forEach(c => {
+                    const ag = state.agents.find(a => a.id === c.agentId);
+                    csv += `"${c.name}","${c.phone}","${ag ? ag.name : 'Unknown'}","${new Date(c.createdAt).toLocaleString()}"\n`;
+                });
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.setAttribute('href', url);
+                a.setAttribute('download', 'signed_in_clients.csv');
+                a.click();
             },
-            adminSelectClient: (clientId) => {
-                state.adminSelectedClient = clientId;
-                renderMonitorClients(); renderMonitorChat();
-                document.getElementById('monitor-chat-view').parentElement.classList.remove('hidden');
+
+            toggleMuteActiveClient: () => {
+                if(!state.agentSelectedClient) return;
+                state.mutes[state.agentSelectedClient] = !state.mutes[state.agentSelectedClient];
+                const btn = document.getElementById('btn-mute-chat');
+                btn.textContent = state.mutes[state.agentSelectedClient] ? "Unmute Chat 🔕" : "Mute Chat 🔔";
+                UI.showToast(state.mutes[state.agentSelectedClient] ? "Chat muted" : "Chat unmuted");
             },
-            
-            /* AGENT: Selection */
-            agentSelectClient: (clientId) => {
+
+            agentSelectClient: async (clientId) => {
                 state.agentSelectedClient = clientId;
                 if(window.innerWidth < 768) document.getElementById('agent-sidebar').classList.add('-translate-x-full');
                 
@@ -595,27 +484,37 @@
                 if(client) {
                     document.getElementById('agent-active-client-info').classList.remove('hidden');
                     document.getElementById('agent-no-client-info').classList.add('hidden');
+                    document.getElementById('agent-chat-actions').classList.remove('hidden');
                     document.getElementById('agent-chat-title').textContent = client.name;
                     document.getElementById('agent-chat-subtitle').textContent = client.phone;
                     document.getElementById('agent-chat-initial').textContent = client.name.charAt(0).toUpperCase();
                     document.getElementById('agent-chat-input-area').classList.remove('hidden');
+                    
+                    const btnMute = document.getElementById('btn-mute-chat');
+                    btnMute.textContent = state.mutes[clientId] ? "Unmute Chat 🔕" : "Mute Chat 🔔";
+
+                    // Mark messages as seen
+                    const unreadMsgs = state.messages.filter(m => m.clientId === clientId && m.sender === 'client' && !m.seen);
+                    for(let m of unreadMsgs) {
+                        try { await updateDoc(doc(state.db, getPath('messages'), m.id), { seen: true }); } catch(e){}
+                    }
                 }
                 renderAgentClients(); renderAgentChat();
             }
         };
 
+        // Form Handlers
         document.getElementById('form-admin-login').addEventListener('submit', (e) => {
             e.preventDefault();
             const u = document.getElementById('admin-user').value;
             const p = document.getElementById('admin-pwd').value;
-            if(u === 'admin' && p === 'password123') {
+            const realPwd = localStorage.getItem('crm_admin_pwd') || 'password123';
+            if(u === 'admin' && p === realPwd) {
                 state.role = 'admin';
                 UI.navigate('admin-dash');
                 renderAdminAgents();
-                document.getElementById('form-admin-login').reset();
-            } else {
-                UI.showToast("Invalid admin credentials", true);
-            }
+                renderAdminClients();
+            } else { UI.showToast("Invalid Admin credentials", true); }
         });
 
         document.getElementById('form-create-agent').addEventListener('submit', async (e) => {
@@ -623,420 +522,211 @@
             const n = document.getElementById('new-agt-name').value.trim();
             const u = document.getElementById('new-agt-user').value.trim();
             const p = document.getElementById('new-agt-pwd').value.trim();
-            
             if(!n || !u || !p) return;
-            const btn = e.target.querySelector('button'); btn.disabled = true;
-            
-            if(state.agents.some(a => a.username === u)) {
-                UI.showToast("Username already exists", true); btn.disabled = false; return;
-            }
-            
             try {
-                const newId = 'agt_' + Math.random().toString(36).substr(2,10);
-                await setDoc(doc(state.db, getPath('agents'), newId), {
-                    name: n, username: u, password: p, status: 'active', createdAt: Date.now()
+                const id = 'agt_' + Math.random().toString(36).substr(2,9);
+                await setDoc(doc(state.db, getPath('agents'), id), {
+                    name: n, username: u, password: p, status: 'offline', lastLogin: null, lastLogout: null, createdAt: Date.now()
                 });
                 document.getElementById('form-create-agent').reset();
-                UI.showToast("Agent created!");
-            } catch(err) { UI.showToast("Error creating agent", true); } 
-            finally { btn.disabled = false; }
+                UI.showToast("Agent created successfully!");
+            } catch(e) { UI.showToast("Error creating agent", true); }
         });
 
-        function renderAdminAgents() {
-            const tbody = document.getElementById('admin-agents-list');
-            if(!tbody || state.role !== 'admin') return;
-            
-            if(state.agents.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-10 text-center text-slate-500">No agents found. Create one.</td></tr>`;
-                return;
-            }
-            
-            let html = '';
-            state.agents.forEach(a => {
-                const isActive = a.status === 'active';
-                const link = `${window.location.origin}${window.location.pathname}?agent=${a.id}`;
-                html += `
-                    <tr class="hover:bg-slate-800/40 transition-colors">
-                        <td class="px-6 py-4 font-medium text-white flex items-center gap-3">
-                            <div class="w-8 h-8 rounded bg-slate-800 flex items-center justify-center text-amber-500 text-xs font-bold border border-slate-700">${a.name.charAt(0).toUpperCase()}</div>
-                            ${UI.escape(a.name)}
-                        </td>
-                        <td class="px-6 py-4 text-slate-400 text-sm font-mono">${UI.escape(a.username)}</td>
-                        <td class="px-6 py-4">
-                            <button onclick="app.toggleAgentStatus('${a.id}', '${a.status}')" class="px-3 py-1 text-[10px] rounded-full uppercase tracking-wider font-bold transition-all ${isActive ? 'bg-green-500/10 text-green-500 border border-green-500/20 hover:bg-green-500/20' : 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700'}">
-                                ${isActive ? 'Active' : 'Inactive'}
-                            </button>
-                        </td>
-                        <td class="px-6 py-4 text-right">
-                            <div class="flex gap-2 justify-end">
-                                <button onclick="app.openResetPassword('${a.id}', '${UI.escape(a.name)}')" class="text-xs bg-[#0f172a] border border-[#1e293b] hover:border-red-500 text-slate-300 hover:text-red-500 px-3 py-1.5 rounded transition-all">Reset PWD</button>
-                                <input type="hidden" id="link-${a.id}" value="${link}">
-                                <button onclick="UI.copyLink('link-${a.id}')" class="text-xs bg-amber-500 hover:bg-amber-400 text-black px-3 py-1.5 rounded font-bold transition-all shadow-sm">Copy Link</button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
-        function renderMonitorAgents() {
-            const list = document.getElementById('monitor-agent-list');
-            if(!list || state.role !== 'admin') return;
-            
-            let html = '';
-            state.agents.forEach(a => {
-                const sel = state.adminSelectedAgent === a.id;
-                html += `
-                    <button onclick="app.adminSelectAgent('${a.id}')" class="w-full text-left p-3 border-b border-[#1e293b] hover:bg-slate-800 transition-colors flex items-center gap-3 ${sel ? 'bg-slate-800 border-l-4 border-l-amber-500' : 'border-l-4 border-l-transparent'}">
-                        <div class="w-2 h-2 rounded-full ${a.status === 'active' ? 'bg-green-500' : 'bg-slate-600'} shrink-0"></div>
-                        <div class="truncate">
-                            <div class="font-bold text-sm text-white truncate">${UI.escape(a.name)}</div>
-                        </div>
-                    </button>
-                `;
-            });
-            list.innerHTML = html || `<div class="p-6 text-xs text-slate-500 text-center">No agents yet.</div>`;
-        }
-        
-        function renderMonitorClients() {
-            const list = document.getElementById('monitor-client-list');
-            const countLabel = document.getElementById('monitor-client-count');
-            if(!list || state.role !== 'admin') return;
-            
-            let dispClients = state.adminSelectedAgent 
-                ? state.clients.filter(c => c.agentId === state.adminSelectedAgent)
-                : state.clients;
-                
-            countLabel.textContent = `${dispClients.length} Total`;
-            
-            let html = '';
-            dispClients.forEach(c => {
-                const sel = state.adminSelectedClient === c.id;
-                const ag = state.agents.find(a => a.id === c.agentId);
-                const agName = ag ? ag.name : 'Unknown Agent';
-                
-                html += `
-                    <button onclick="app.adminSelectClient('${c.id}')" class="w-full text-left p-4 border-b border-[#1e293b] hover:bg-slate-800 transition-colors ${sel ? 'bg-slate-800 border-l-4 border-l-amber-500' : 'border-l-4 border-l-transparent'}">
-                        <div class="flex justify-between items-baseline mb-1 gap-2">
-                            <span class="font-bold text-sm text-white truncate flex-1">${UI.escape(c.name)}</span>
-                            <span class="text-[9px] text-slate-500 shrink-0">${UI.formatTime(c.lastMessageTime)}</span>
-                        </div>
-                        <div class="text-xs text-amber-500 font-mono mb-1.5">${UI.escape(c.phone)}</div>
-                        <div class="text-[10px] text-slate-400 bg-slate-950 px-2 py-1 rounded inline-block mb-1.5 border border-slate-800">Agent: ${UI.escape(agName)}</div>
-                        <div class="text-[11px] text-slate-500 truncate italic">${UI.escape(c.lastMessage || 'Connected')}</div>
-                    </button>
-                `;
-            });
-            list.innerHTML = html || `<div class="p-8 text-center text-slate-500 text-sm">No clients found.</div>`;
-        }
-
-        function renderMonitorChat() {
-            const view = document.getElementById('monitor-chat-view');
-            const header = document.getElementById('monitor-chat-header-info');
-            const inputArea = document.getElementById('monitor-chat-input-area');
-            if(!view || state.role !== 'admin') return;
-            
-            if(!state.adminSelectedClient) {
-                view.innerHTML = `<div class="h-full flex items-center justify-center text-slate-500 text-sm">Select a client to monitor</div>`;
-                header.innerHTML = 'Select a client to monitor/chat';
-                inputArea.classList.add('hidden');
-                return;
-            }
-            
-            const client = state.clients.find(c => c.id === state.adminSelectedClient);
-            const agent = state.agents.find(a => a.id === client?.agentId);
-            
-            header.innerHTML = client ? `
-                <div class="flex flex-col md:flex-row md:items-center gap-1 md:gap-4">
-                    <span>${UI.escape(client.name)}</span>
-                    <span class="text-slate-400 text-xs font-mono">${UI.escape(client.phone)}</span>
-                    <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-amber-500 border border-slate-700">Via: ${UI.escape(agent?.name || 'Unknown')}</span>
-                </div>
-            ` : '';
-            
-            inputArea.classList.remove('hidden');
-            
-            const chatMsgs = state.messages.filter(m => m.clientId === state.adminSelectedClient);
-            let html = '';
-            chatMsgs.forEach(m => {
-                let senderLabel = '';
-                let alignment = '';
-                let bubbleClass = '';
-                
-                if (m.sender === 'client') {
-                    alignment = 'justify-start';
-                    bubbleClass = 'bg-slate-800 text-slate-200 rounded-tr-sm border border-slate-700 shadow-sm';
-                    senderLabel = client?.name || 'Client';
-                } else if (m.sender === 'agent') {
-                    alignment = 'justify-end';
-                    bubbleClass = 'bg-[#1e293b] text-white rounded-tl-sm shadow-md';
-                    senderLabel = agent?.name || 'Agent';
-                } else if (m.sender === 'admin') {
-                    alignment = 'justify-end';
-                    bubbleClass = 'bg-red-900/40 text-red-100 rounded-tl-sm border border-red-500/30 shadow-md';
-                    senderLabel = '👑 You (Admin)';
-                }
-                
-                html += `
-                    <div class="flex w-full ${alignment}">
-                        <div class="max-w-[80%]">
-                            <div class="text-[9px] font-bold tracking-wider mb-1 px-1 ${m.sender === 'client' ? 'text-slate-500 text-left' : (m.sender==='admin' ? 'text-red-500 text-right' : 'text-amber-500 text-right')}">${UI.escape(senderLabel)} • ${UI.formatTime(m.timestamp)}</div>
-                            <div class="rounded-2xl p-3.5 ${bubbleClass}">
-                                <div class="text-sm break-words leading-relaxed">${UI.escape(m.text)}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            view.innerHTML = html || `<div class="h-full flex items-center justify-center text-slate-500 text-sm">No messages yet. Admin can type below to intervene.</div>`;
-            UI.scrollBottom('monitor-chat-view');
-        }
-
-        document.getElementById('form-admin-msg').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if(!state.adminSelectedClient || state.role !== 'admin') return;
-            
-            const input = document.getElementById('admin-input-text');
-            const txt = input.value.trim();
-            if(!txt) return;
-            input.value = '';
-            
-            try {
-                await addDoc(collection(state.db, getPath('messages')), {
-                    clientId: state.adminSelectedClient,
-                    agentId: state.clients.find(c=>c.id === state.adminSelectedClient)?.agentId || 'admin',
-                    sender: 'admin',
-                    text: txt,
-                    timestamp: Date.now()
-                });
-                await updateDoc(doc(state.db, getPath('clients'), state.adminSelectedClient), {
-                    lastMessage: "[Admin]: " + txt,
-                    lastMessageTime: Date.now()
-                });
-            } catch(err) { UI.showToast("Failed to send admin message", true); }
-        });
-
-        document.getElementById('form-agent-login').addEventListener('submit', (e) => {
+        document.getElementById('form-agent-login').addEventListener('submit', async (e) => {
             e.preventDefault();
             const u = document.getElementById('agent-user').value.trim();
             const p = document.getElementById('agent-pwd').value.trim();
-            
             const agent = state.agents.find(a => a.username === u && a.password === p);
-            
             if(agent) {
-                if(agent.status !== 'active') { UI.showToast("Account suspended by Admin.", true); return; }
                 state.role = 'agent';
                 state.myAgentId = agent.id;
-                
+                try {
+                    await updateDoc(doc(state.db, getPath('agents'), agent.id), { status: 'online', lastLogin: Date.now() });
+                } catch(e){}
                 document.getElementById('agent-dash-name').textContent = agent.name;
                 document.getElementById('agent-dash-initial').textContent = agent.name.charAt(0).toUpperCase();
-                
-                const link = `${window.location.origin}${window.location.pathname}?agent=${agent.id}`;
-                document.getElementById('agent-invite-link').value = link;
-                
+                document.getElementById('agent-invite-link').value = `${window.location.origin}${window.location.pathname}?agent=${agent.id}`;
                 UI.navigate('agent-dash');
                 renderAgentClients();
-                document.getElementById('form-agent-login').reset();
-            } else { UI.showToast("Invalid Agent Credentials", true); }
+            } else { UI.showToast("Invalid credentials", true); }
         });
-
-        function renderAgentClients() {
-            const list = document.getElementById('agent-client-list');
-            const countLabel = document.getElementById('agent-client-count');
-            if(!list || state.role !== 'agent') return;
-            
-            const myClients = state.clients.filter(c => c.agentId === state.myAgentId);
-            countLabel.textContent = myClients.length;
-            
-            let html = '';
-            myClients.forEach(c => {
-                const sel = state.agentSelectedClient === c.id;
-                html += `
-                    <button onclick="app.agentSelectClient('${c.id}')" class="w-full text-left p-4 border-b border-[#1e293b] hover:bg-slate-800 transition-colors ${sel ? 'bg-slate-800 border-l-4 border-l-amber-500' : 'border-l-4 border-l-transparent'}">
-                        <div class="flex justify-between items-baseline mb-1 gap-2">
-                            <span class="font-bold text-sm text-white truncate flex-1">${UI.escape(c.name)}</span>
-                            <span class="text-[9px] text-slate-400 shrink-0 bg-slate-900 px-1.5 py-0.5 rounded">${UI.formatTime(c.lastMessageTime)}</span>
-                        </div>
-                        <div class="text-xs text-amber-500 font-mono mb-1.5">${UI.escape(c.phone)}</div>
-                        <div class="text-[11px] text-slate-500 truncate italic">${UI.escape(c.lastMessage || 'Joined')}</div>
-                    </button>
-                `;
-            });
-            
-            if(myClients.length === 0) {
-                list.innerHTML = `<div class="p-6 text-center text-slate-400 text-sm mt-4">No clients yet. Share your invite link!</div>`;
-            } else { list.innerHTML = html; }
-        }
 
         document.getElementById('form-agent-msg').addEventListener('submit', async (e) => {
             e.preventDefault();
             if(!state.agentSelectedClient || state.role !== 'agent') return;
-            
             const input = document.getElementById('agent-input-text');
             const txt = input.value.trim();
             if(!txt) return;
             input.value = '';
-            
             try {
                 await addDoc(collection(state.db, getPath('messages')), {
-                    clientId: state.agentSelectedClient,
-                    agentId: state.myAgentId,
-                    sender: 'agent',
-                    text: txt,
-                    timestamp: Date.now()
+                    clientId: state.agentSelectedClient, agentId: state.myAgentId, sender: 'agent', text: txt, timestamp: Date.now(), seen: false
                 });
-                await updateDoc(doc(state.db, getPath('clients'), state.agentSelectedClient), {
-                    lastMessage: txt,
-                    lastMessageTime: Date.now()
-                });
-            } catch(err) { UI.showToast("Failed to send", true); }
+                await updateDoc(doc(state.db, getPath('clients'), state.agentSelectedClient), { lastMessage: txt, lastMessageTime: Date.now() });
+            } catch(e) { UI.showToast("Failed to send", true); }
         });
-
-        function renderAgentChat() {
-            const view = document.getElementById('agent-chat-messages');
-            if(!view || !state.agentSelectedClient || state.role !== 'agent') return;
-            
-            const chatMsgs = state.messages.filter(m => m.clientId === state.agentSelectedClient);
-            let html = '';
-            chatMsgs.forEach(m => {
-                const isMe = m.sender === 'agent' || m.sender === 'admin';
-                const isAdmin = m.sender === 'admin';
-                
-                html += `
-                    <div class="flex w-full ${isMe ? 'justify-end' : 'justify-start'} fade-in">
-                        <div class="max-w-[80%] md:max-w-[65%] rounded-2xl px-5 py-3 ${
-                            m.sender === 'client' ? 'bg-slate-800 text-white rounded-bl-sm border border-slate-700 shadow-md' : 
-                            (isAdmin ? 'bg-red-900/80 text-red-100 rounded-br-sm border border-red-500/50' : 'bg-amber-500 text-black rounded-br-sm shadow-lg')
-                        }">
-                            ${isAdmin ? '<div class="text-[9px] font-bold text-red-300 uppercase tracking-wider mb-1">Admin Note</div>' : ''}
-                            <div class="text-[15px] break-words leading-relaxed">${UI.escape(m.text)}</div>
-                            <div class="text-[10px] text-right mt-1.5 opacity-60 font-semibold">${UI.formatTime(m.timestamp)}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            view.innerHTML = html || `<div class="h-full flex items-center justify-center text-slate-500 text-sm">Start typing...</div>`;
-            UI.scrollBottom('agent-chat-messages');
-        }
-
-        function handleClientRouting() {
-            if(state.role === 'client') return; 
-            
-            const agent = state.agents.find(a => a.id === state.targetAgentId);
-            if(!agent) return; 
-            
-            if(agent.status !== 'active') {
-                document.getElementById('view-loading').innerHTML = `
-                    <div class="bg-slate-900 p-8 rounded-2xl border border-slate-800 max-w-sm text-center shadow-2xl">
-                        <p class="text-white font-bold text-lg mb-2">Agent Unavailable</p>
-                        <p class="text-slate-400 text-sm">This channel is currently inactive.</p>
-                    </div>`;
-                return;
-            }
-
-            const storedClientStr = localStorage.getItem(`crm_client_${state.targetAgentId}`);
-            if (storedClientStr) {
-                try {
-                    const storedData = JSON.parse(storedClientStr);
-                    state.myClientId = storedData.clientId;
-                    state.role = 'client';
-                    UI.navigate('client-chat');
-                    renderClientChat();
-                    return;
-                } catch(e){}
-            }
-
-            document.getElementById('client-agent-name').textContent = agent.name;
-            UI.navigate('client-onboard');
-        }
 
         document.getElementById('form-client-onboard').addEventListener('submit', async (e) => {
             e.preventDefault();
             const n = document.getElementById('client-name').value.trim();
             const p = document.getElementById('client-phone').value.trim();
             if(!n || !p || !state.targetAgentId) return;
-            
-            const btn = document.getElementById('btn-client-start');
-            btn.disabled = true; btn.innerHTML = "Connecting...";
-            
             try {
-                const cid = 'cli_' + Math.random().toString(36).substr(2,12);
+                const cid = 'cli_' + Math.random().toString(36).substr(2,10);
                 await setDoc(doc(state.db, getPath('clients'), cid), {
-                    agentId: state.targetAgentId, name: n, phone: p,
-                    createdAt: Date.now(), lastMessage: 'Client joined', lastMessageTime: Date.now()
+                    agentId: state.targetAgentId, name: n, phone: p, createdAt: Date.now(), lastMessage: 'Joined', lastMessageTime: Date.now()
                 });
-                
-                localStorage.setItem(`crm_client_${state.targetAgentId}`, JSON.stringify({ clientId: cid }));
+                localStorage.setItem(`crm_client_lock_${state.targetAgentId}`, cid);
                 state.myClientId = cid;
                 state.role = 'client';
-                
                 UI.navigate('client-chat');
                 renderClientChat();
-            } catch(err) { 
-                UI.showToast("Connection failed", true); 
-                btn.disabled = false; btn.innerHTML = `Start Secure Chat`;
-            }
+            } catch(e) { UI.showToast("Onboarding failed", true); }
         });
 
         document.getElementById('form-client-msg').addEventListener('submit', async (e) => {
             e.preventDefault();
             if(!state.myClientId || state.role !== 'client') return;
-            
             const input = document.getElementById('client-input-text');
             const txt = input.value.trim();
             if(!txt) return;
             input.value = '';
-            
             try {
                 await addDoc(collection(state.db, getPath('messages')), {
-                    clientId: state.myClientId,
-                    agentId: state.targetAgentId,
-                    sender: 'client',
-                    text: txt,
-                    timestamp: Date.now()
+                    clientId: state.myClientId, agentId: state.targetAgentId, sender: 'client', text: txt, timestamp: Date.now(), seen: false
                 });
-                await updateDoc(doc(state.db, getPath('clients'), state.myClientId), {
-                    lastMessage: txt,
-                    lastMessageTime: Date.now()
-                });
-            } catch(err) { UI.showToast("Failed to send", true); }
+                await updateDoc(doc(state.db, getPath('clients'), state.myClientId), { lastMessage: txt, lastMessageTime: Date.now() });
+            } catch(e) { UI.showToast("Failed to send", true); }
         });
 
-        function renderClientChat() {
-            const view = document.getElementById('client-chat-messages');
-            if(!view || !state.myClientId || state.role !== 'client') return;
-            
-            const chatMsgs = state.messages.filter(m => m.clientId === state.myClientId);
+        // Render Functions
+        function renderAdminAgents() {
+            const tbody = document.getElementById('admin-agents-list');
+            if(!tbody || state.role !== 'admin') return;
             let html = '';
-            chatMsgs.forEach(m => {
-                const isMe = m.sender === 'client';
-                const isSupport = m.sender === 'agent' || m.sender === 'admin';
-                
+            state.agents.forEach(a => {
+                const isOnline = a.status === 'online';
+                html += `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                        <td class="px-5 py-4 font-medium">${UI.escape(a.name)} <span class="text-xs text-slate-400 block">@${UI.escape(a.username)}</span></td>
+                        <td class="px-5 py-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${isOnline ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/10 text-slate-500'}">${isOnline ? 'Online' : 'Offline'}</span></td>
+                        <td class="px-5 py-4 text-xs text-slate-500">In: ${a.lastLogin ? new Date(a.lastLogin).toLocaleTimeString() : 'Never'}<br>Out: ${a.lastLogout ? new Date(a.lastLogout).toLocaleTimeString() : 'N/A'}</td>
+                        <td class="px-5 py-4 text-right">
+                            <button onclick="document.getElementById('modal-pwd-agent-id').value='${a.id}';document.getElementById('modal-pwd-agent-name').textContent='For: ${UI.escape(a.name)}';UI.openModal('pwd-reset')" class="text-xs bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-black px-3 py-1.5 rounded-xl font-medium">Reset PWD</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html || `<tr><td colspan="4" class="px-5 py-6 text-center text-slate-400">No agents found</td></tr>`;
+        }
+
+        function renderAdminClients() {
+            const tbody = document.getElementById('admin-clients-list');
+            if(!tbody || state.role !== 'admin') return;
+            let html = '';
+            state.clients.forEach(c => {
+                const ag = state.agents.find(a => a.id === c.agentId);
+                html += `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                        <td class="px-5 py-4 font-medium">${UI.escape(c.name)}</td>
+                        <td class="px-5 py-4 text-slate-500">${UI.escape(c.phone)}</td>
+                        <td class="px-5 py-4 text-amber-500 font-medium">${ag ? UI.escape(ag.name) : 'Unassigned'}</td>
+                        <td class="px-5 py-4 text-xs text-slate-400">${new Date(c.createdAt).toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html || `<tr><td colspan="4" class="px-5 py-6 text-center text-slate-400">No users signed in yet</td></tr>`;
+        }
+
+        function renderAgentClients() {
+            const list = document.getElementById('agent-client-list');
+            if(!list || state.role !== 'agent') return;
+            const myClients = state.clients.filter(c => c.agentId === state.myAgentId);
+            let html = '';
+            myClients.forEach(c => {
+                const sel = state.agentSelectedClient === c.id;
+                const unreadCount = state.messages.filter(m => m.clientId === c.id && m.sender === 'client' && !m.seen).length;
+                const isMuted = state.mutes[c.id];
+                html += `
+                    <button onclick="app.agentSelectClient('${c.id}')" class="w-full text-left p-4 hover:bg-slate-100 dark:hover:bg-slate-800/50 flex flex-col gap-1 ${sel ? 'bg-amber-500/10 border-l-4 border-amber-500' : ''}">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-xs truncate">${UI.escape(c.name)}</span>
+                            <div class="flex items-center gap-1">
+                                ${isMuted ? '<span class="text-[10px]">🔕</span>' : ''}
+                                ${unreadCount > 0 ? `<span class="bg-amber-500 text-black font-bold text-[10px] px-1.5 py-0.5 rounded-full">${unreadCount}</span>` : ''}
+                            </div>
+                        </div>
+                        <span class="text-[10px] text-amber-500 font-mono">${UI.escape(c.phone)}</span>
+                        <span class="text-[10px] text-slate-400 truncate">${UI.escape(c.lastMessage || '')}</span>
+                    </button>
+                `;
+            });
+            list.innerHTML = html || `<div class="p-6 text-center text-slate-400 text-xs">No clients assigned yet.</div>`;
+        }
+
+        function renderAgentChat() {
+            const view = document.getElementById('agent-chat-messages');
+            if(!view || !state.agentSelectedClient || state.role !== 'agent') return;
+            const msgs = state.messages.filter(m => m.clientId === state.agentSelectedClient);
+            let html = '';
+            msgs.forEach(m => {
+                const isMe = m.sender === 'agent';
                 html += `
                     <div class="flex w-full ${isMe ? 'justify-end' : 'justify-start'} fade-in">
-                        <div class="max-w-[85%] md:max-w-[70%] rounded-2xl px-5 py-3 ${isMe ? 'bg-slate-800 text-white rounded-br-sm border border-slate-700 shadow-md' : 'bg-amber-500 text-black rounded-bl-sm shadow-lg'}">
-                            ${isSupport ? '<div class="text-[10px] font-bold text-black/60 uppercase tracking-wider mb-1">Support Team</div>' : ''}
-                            <div class="text-[15px] break-words leading-relaxed">${UI.escape(m.text)}</div>
-                            <div class="text-[10px] text-right mt-1.5 opacity-70 font-semibold">${UI.formatTime(m.timestamp)}</div>
+                        <div class="max-w-[75%] rounded-2xl px-4 py-3 ${isMe ? 'bg-amber-500 text-black' : 'bg-slate-100 dark:bg-slate-800'}">
+                            <div class="text-xs break-words">${UI.escape(m.text)}</div>
+                            <div class="text-[9px] text-right mt-1 opacity-60 font-semibold">${UI.formatTime(m.timestamp)} ${isMe ? (m.seen ? '✓✓ Seen' : '✓ Sent') : ''}</div>
                         </div>
                     </div>
                 `;
             });
-            
-            if(chatMsgs.length === 0) {
-                html = `<div class="h-full flex flex-col items-center justify-center text-slate-500 text-sm gap-3">
-                    <div class="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center border border-slate-800 text-amber-500">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                    </div>
-                    <p class="text-slate-400 font-medium">Say hello to start chatting with support!</p>
-                </div>`;
+            view.innerHTML = html || `<div class="h-full flex items-center justify-center text-xs text-slate-400">No messages yet.</div>`;
+            UI.scrollBottom('agent-chat-messages');
+        }
+
+        function handleClientRouting() {
+            if(state.role === 'client') return;
+            const agent = state.agents.find(a => a.id === state.targetAgentId);
+            if(!agent) {
+                document.getElementById('view-loading').innerHTML = `<div class="text-red-500 text-xs">Invalid or broken agent link.</div>`;
+                return;
             }
-            view.innerHTML = html;
+
+            // Strict Agent-Client Isolation Check via localStorage lock
+            const lockedClientId = localStorage.getItem(`crm_client_lock_${state.targetAgentId}`);
+            if(lockedClientId) {
+                state.myClientId = lockedClientId;
+                state.role = 'client';
+                UI.navigate('client-chat');
+                renderClientChat();
+                return;
+            }
+
+            document.getElementById('client-agent-name').textContent = agent.name;
+            UI.navigate('client-onboard');
+        }
+
+        function renderClientChat() {
+            const view = document.getElementById('client-chat-messages');
+            if(!view || !state.myClientId || state.role !== 'client') return;
+            const msgs = state.messages.filter(m => m.clientId === state.myClientId);
+            let html = '';
+            msgs.forEach(m => {
+                const isMe = m.sender === 'client';
+                html += `
+                    <div class="flex w-full ${isMe ? 'justify-end' : 'justify-start'} fade-in">
+                        <div class="max-w-[75%] rounded-2xl px-4 py-3 ${isMe ? 'bg-amber-500 text-black' : 'bg-slate-100 dark:bg-slate-800'}">
+                            <div class="text-xs break-words">${UI.escape(m.text)}</div>
+                            <div class="text-[9px] text-right mt-1 opacity-60 font-semibold">${UI.formatTime(m.timestamp)} ${isMe ? (m.seen ? '✓✓ Seen' : '✓ Sent') : ''}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            view.innerHTML = html || `<div class="h-full flex items-center justify-center text-xs text-slate-400">Say hello to support!</div>`;
             UI.scrollBottom('client-chat-messages');
         }
 
-        // Initialize application on load
         initApp();
     </script>
 </body>
