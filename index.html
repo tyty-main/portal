@@ -1,1051 +1,125 @@
-<!DOCTYPE html>
-<html lang="en" class="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Enterprise Live Support CRM</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 500: '#f59e0b', 600: '#d97706' }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; margin: 0; }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background-color: rgba(150,150,150,0.3); border-radius: 10px; }
-        .view { display: none; height: 100%; width: 100%; flex-direction: column; }
-        .view.active { display: flex; }
-        .fade-in { animation: fadeIn 0.25s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        .modal-overlay { backdrop-filter: blur(6px); background-color: rgba(0, 0, 0, 0.6); }
-    </style>
-</head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200">
+import React, { useState } from 'react';
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 px-5 py-3 rounded-xl shadow-2xl z-[150] hidden flex items-center gap-3 text-sm font-medium border transition-all">
-        <span id="toast-msg"></span>
+const LiveChatsDashboard = () => {
+  // Yeh aapka API se aane wala data structure hona chahiye
+  const [agentsList, setAgentsList] = useState([
+    { 
+      id: 1, 
+      name: 'Agent: Test', 
+      clients: [
+        { id: 'c1', name: 'Cx1', status: 'Hii' },
+        { id: 'c2', name: 'Cx2', status: 'Joined' }
+      ] 
+    },
+    { 
+      id: 2, 
+      name: 'Agent: Rahul', 
+      clients: [
+        { id: 'c3', name: 'Cx3', status: 'Typing...' }
+      ] 
+    }
+  ]);
+
+  // States to track selections
+  const [selectedAgent, setSelectedAgent] = useState(null);
+  const [selectedClient, setSelectedClient] = useState(null);
+
+  // Back button handler
+  const handleBackToAgents = () => {
+    setSelectedAgent(null);
+    setSelectedClient(null);
+  };
+
+  return (
+    <div className="flex h-screen bg-gray-50">
+      
+      {/* 1. LEFT MENU (Already exists in your UI) */}
+      <div className="w-64 bg-white border-r">
+        {/* ... Other menu items ... */}
+        <div className="p-4 bg-orange-50 border-l-4 border-red-500 text-orange-600 font-bold cursor-pointer">
+          💬 Live Chats
+        </div>
+      </div>
+
+      {/* 2. MIDDLE COLUMN: Agent & Client Selection */}
+      <div className="w-80 bg-white border-r flex flex-col">
+        
+        {/* CONDITION 1: Agent Select Karein */}
+        {!selectedAgent ? (
+          <>
+            <div className="p-4 font-bold text-gray-500 border-b text-xs uppercase tracking-wider">
+              Select An Agent
+            </div>
+            <div className="overflow-y-auto">
+              {agentsList.map(agent => (
+                <div 
+                  key={agent.id} 
+                  onClick={() => setSelectedAgent(agent)}
+                  className="p-4 border-b cursor-pointer hover:bg-gray-50 transition-colors"
+                >
+                  <div className="font-semibold">{agent.name}</div>
+                  <div className="text-xs text-gray-400">
+                    Active Clients: {agent.clients.length}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          
+        /* CONDITION 2: Selected Agent ke Clients Select Karein */
+          <>
+            <div className="p-4 font-bold text-gray-500 border-b flex justify-between items-center text-xs uppercase tracking-wider">
+              <span>{selectedAgent.name}'s Clients</span>
+              <button 
+                onClick={handleBackToAgents}
+                className="text-blue-500 hover:text-blue-700 capitalize text-sm font-normal"
+              >
+                ← Back
+              </button>
+            </div>
+            <div className="overflow-y-auto">
+              {selectedAgent.clients.map(client => (
+                <div 
+                  key={client.id} 
+                  onClick={() => setSelectedClient(client)}
+                  className={`p-4 border-b cursor-pointer transition-colors ${
+                    selectedClient?.id === client.id ? 'bg-orange-50 border-l-4 border-orange-500' : 'hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="font-semibold">{client.name}</div>
+                  <div className="text-xs text-gray-400">{client.status}</div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* 3. RIGHT COLUMN: Chat Monitor Area */}
+      <div className="flex-1 bg-white p-6">
+        {selectedClient ? (
+          <div className="h-full flex flex-col">
+            <div className="border-b pb-4 mb-4">
+              <h2 className="text-lg font-bold">{selectedClient.name}</h2>
+              <p className="text-sm text-gray-500">Monitoring via {selectedAgent.name}</p>
+            </div>
+            {/* Yaha chat messages render honge */}
+            <div className="flex-1 text-gray-400 flex items-center justify-center">
+              Chat interface will load here...
+            </div>
+          </div>
+        ) : (
+          <div className="h-full flex items-center justify-center text-gray-400">
+            {selectedAgent 
+              ? "Choose a client from the left list" 
+              : "Select an agent first to view their active conversations"}
+          </div>
+        )}
+      </div>
+
     </div>
+  );
+};
 
-    <!-- Modal: Admin Settings (Change Name & Password) -->
-    <div id="modal-admin-settings" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl fade-in">
-            <h3 class="text-lg font-bold mb-2">Admin Profile Settings</h3>
-            <p class="text-xs text-slate-500 mb-4">Update your admin username and password.</p>
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Admin Username</label>
-                    <input type="text" id="admin-edit-user" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-amber-500">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Current Password</label>
-                    <input type="password" id="admin-old-pwd" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-amber-500" placeholder="Required for security">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">New Password (Optional)</label>
-                    <input type="password" id="admin-new-pwd" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-amber-500" placeholder="Leave blank to keep current">
-                </div>
-            </div>
-            <div class="flex gap-3 justify-end mt-5">
-                <button onclick="UI.closeModal('admin-settings')" class="px-4 py-2 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-white">Cancel</button>
-                <button onclick="app.updateAdminSettings()" class="bg-amber-500 text-black font-semibold px-4 py-2 rounded-xl text-sm hover:bg-amber-400">Save Changes</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Edit Agent -->
-    <div id="modal-edit-agent" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl fade-in">
-            <h3 class="text-lg font-bold mb-2">Edit Agent Details</h3>
-            <p class="text-xs text-slate-500 mb-4" id="modal-edit-agent-sub">Update credentials</p>
-            <input type="hidden" id="modal-edit-agent-id">
-            <div class="space-y-3">
-                <input type="text" id="modal-edit-agt-name" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-amber-500" placeholder="Full Name">
-                <input type="text" id="modal-edit-agt-user" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-amber-500" placeholder="Username">
-                <input type="text" id="modal-edit-agt-pwd" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-amber-500" placeholder="New Password">
-            </div>
-            <div class="flex gap-3 justify-end mt-5">
-                <button onclick="UI.closeModal('edit-agent')" class="px-4 py-2 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-white">Cancel</button>
-                <button onclick="app.confirmEditAgent()" class="bg-amber-500 text-black font-semibold px-4 py-2 rounded-xl text-sm hover:bg-amber-400">Update Agent</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- View: Landing Portal Selection -->
-    <div id="view-landing" class="view active items-center justify-center p-4 relative">
-        <button onclick="UI.toggleTheme()" class="absolute top-6 right-6 p-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:scale-105 transition-all">
-            <svg class="w-5 h-5 theme-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-        </button>
-        <div class="text-center mb-10 fade-in">
-            <div class="w-16 h-16 mx-auto bg-gradient-to-tr from-amber-600 to-yellow-400 rounded-2xl flex items-center justify-center mb-4 shadow-lg text-black font-bold text-2xl">CRM</div>
-            <h1 class="text-2xl font-bold mb-1">Support Workspace</h1>
-            <p class="text-slate-500 text-xs">Select your portal to continue</p>
-        </div>
-        <div class="flex flex-col sm:flex-row gap-5 w-full max-w-md fade-in">
-            <button onclick="UI.navigate('admin-login')" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-500 rounded-2xl p-6 text-left transition-all shadow-sm group">
-                <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3 group-hover:text-amber-500 transition-colors">👑</div>
-                <h2 class="font-bold text-base group-hover:text-amber-500">Admin Portal</h2>
-                <p class="text-slate-500 text-xs mt-1">Management & monitoring</p>
-            </button>
-            <button onclick="UI.navigate('agent-login')" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-500 rounded-2xl p-6 text-left transition-all shadow-sm group">
-                <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3 group-hover:text-amber-500 transition-colors">🎧</div>
-                <h2 class="font-bold text-base group-hover:text-amber-500">Agent Portal</h2>
-                <p class="text-slate-500 text-xs mt-1">Live client support</p>
-            </button>
-        </div>
-    </div>
-
-    <!-- View: Admin Login -->
-    <div id="view-admin-login" class="view items-center justify-center p-4 relative">
-        <button onclick="UI.navigate('landing')" class="absolute top-6 left-6 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center gap-2 text-xs font-semibold bg-slate-200 dark:bg-slate-800 px-3.5 py-2 rounded-xl">← Back</button>
-        <div class="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl fade-in">
-            <h2 class="text-xl font-bold mb-1 text-center">Admin Secure Login</h2>
-            <p class="text-slate-500 text-xs text-center mb-6">Enter system admin credentials</p>
-            <form id="form-admin-login" class="space-y-4">
-                <input type="text" id="admin-user" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3.5 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Username" required>
-                <input type="password" id="admin-pwd" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3.5 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Password" required>
-                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-3.5 rounded-xl text-sm transition-all shadow-md">Login Dashboard</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- View: Agent Login -->
-    <div id="view-agent-login" class="view items-center justify-center p-4 relative">
-        <button onclick="UI.navigate('landing')" class="absolute top-6 left-6 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center gap-2 text-xs font-semibold bg-slate-200 dark:bg-slate-800 px-3.5 py-2 rounded-xl">← Back</button>
-        <div class="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl fade-in">
-            <h2 class="text-xl font-bold mb-1 text-center">Agent Login</h2>
-            <p class="text-slate-500 text-xs text-center mb-6">Sign in with your assigned credentials</p>
-            <form id="form-agent-login" class="space-y-4">
-                <input type="text" id="agent-user" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3.5 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Agent Username" required>
-                <input type="password" id="agent-pwd" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3.5 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Password" required>
-                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-3.5 rounded-xl text-sm transition-all shadow-md">Access Workspace</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- View: Admin Dashboard -->
-    <div id="view-admin-dash" class="view bg-slate-50 dark:bg-slate-950 flex-row">
-        <!-- Sidebar -->
-        <nav class="w-16 md:w-60 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0 z-20">
-            <div class="h-16 flex items-center justify-between px-4 md:px-6 border-b border-slate-200 dark:border-slate-800">
-                <span class="font-bold text-sm hidden md:block" id="admin-brand-title">Admin HQ</span>
-                <button onclick="UI.toggleTheme()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs">🌓</button>
-            </div>
-            <div class="flex-1 py-4 flex flex-col gap-1.5 px-3 overflow-y-auto">
-                <button onclick="UI.switchAdminTab('agents')" id="tab-btn-agents" class="p-3 rounded-xl text-left bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center gap-3 font-medium text-sm">
-                    <span>👥</span> <span class="hidden md:inline">Agents</span>
-                </button>
-                <button onclick="UI.switchAdminTab('chats')" id="tab-btn-chats" class="p-3 rounded-xl text-left text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 font-medium text-sm">
-                    <span>💬</span> <span class="hidden md:inline">Live Chats</span>
-                </button>
-                <button onclick="UI.switchAdminTab('newjoins')" id="tab-btn-newjoins" class="p-3 rounded-xl text-left text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 font-medium text-sm">
-                    <span>✨</span> <span class="hidden md:inline">New Joins</span>
-                </button>
-                <button onclick="UI.switchAdminTab('livestatus')" id="tab-btn-livestatus" class="p-3 rounded-xl text-left text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 font-medium text-sm">
-                    <span>⚡</span> <span class="hidden md:inline">Live Status</span>
-                </button>
-                <button onclick="UI.switchAdminTab('monitor')" id="tab-btn-monitor" class="p-3 rounded-xl text-left text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 font-medium text-sm">
-                    <span>📊</span> <span class="hidden md:inline">Signed Clients</span>
-                </button>
-            </div>
-            <div class="p-3 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-2">
-                <button onclick="UI.openModal('admin-settings')" class="w-full py-2.5 px-3 text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-center">Settings / Edit Profile</button>
-                <button onclick="app.logout()" class="w-full py-2.5 px-3 text-xs font-semibold text-red-500 hover:bg-red-500/10 rounded-xl text-center">Logout</button>
-            </div>
-        </nav>
-
-        <!-- Tab: Agents Management -->
-        <div id="admin-tab-agents" class="flex-1 flex flex-col h-full overflow-hidden">
-            <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 flex items-center justify-between px-6 shrink-0">
-                <h2 class="font-bold text-base">Agent Management & Availability</h2>
-            </div>
-            <div class="flex-1 overflow-y-auto p-6 space-y-6">
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-                    <h3 class="font-bold text-sm mb-4">Create New Agent</h3>
-                    <form id="form-create-agent" class="flex flex-col md:flex-row gap-3">
-                        <input type="text" id="new-agt-name" placeholder="Full Name" class="flex-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none" required>
-                        <input type="text" id="new-agt-user" placeholder="Username" class="flex-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none" required>
-                        <input type="password" id="new-agt-pwd" placeholder="Password" class="flex-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none" required>
-                        <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-black font-semibold px-6 py-3 rounded-xl text-sm transition-all shadow-sm">Create</button>
-                    </form>
-                </div>
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-                    <table class="w-full text-left text-sm whitespace-nowrap">
-                        <tr class="bg-slate-100 dark:bg-slate-800/50 text-slate-500 text-xs uppercase font-semibold">
-                            <th class="px-5 py-3.5">Agent</th>
-                            <th class="px-5 py-3.5">Status / Availability</th>
-                            <th class="px-5 py-3.5">Last Login / Logout</th>
-                            <th class="px-5 py-3.5 text-right">Actions</th>
-                        </tr>
-                        <tbody id="admin-agents-list" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab: Admin Live Chats Monitoring -->
-        <div id="admin-tab-chats" class="flex-1 flex flex-row h-full overflow-hidden hidden bg-white dark:bg-slate-950">
-            <div class="w-80 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full bg-slate-50 dark:bg-slate-900">
-                <div class="p-4 border-b border-slate-200 dark:border-slate-800 font-bold text-xs uppercase text-slate-500">Active Client Conversations</div>
-                <div class="flex-1 overflow-y-auto divide-y divide-slate-200 dark:divide-slate-800" id="admin-chat-client-list"></div>
-            </div>
-            <div class="flex-1 flex flex-col h-full relative">
-                <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center px-6 justify-between">
-                    <div id="admin-chat-header-info" class="text-xs text-slate-500 font-medium">Select a conversation to monitor</div>
-                </div>
-                <div class="flex-1 p-4 overflow-y-auto flex flex-col gap-3" id="admin-chat-messages">
-                    <div class="h-full flex items-center justify-center text-xs text-slate-400">Choose a client from the left list</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab: New Joins (Agents & Users with Timings) -->
-        <div id="admin-tab-newjoins" class="flex-1 flex flex-col h-full overflow-hidden hidden">
-            <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 flex items-center justify-between px-6 shrink-0">
-                <h2 class="font-bold text-base">New Joins Directory (Agents & Users)</h2>
-            </div>
-            <div class="flex-1 overflow-y-auto p-6 space-y-6">
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-                    <h3 class="font-bold text-sm mb-4 text-amber-500">🎧 Recently Joined Agents</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm whitespace-nowrap">
-                            <tr class="bg-slate-100 dark:bg-slate-800/50 text-slate-500 text-xs uppercase font-semibold">
-                                <th class="px-4 py-3">Agent Name</th>
-                                <th class="px-4 py-3">Username</th>
-                                <th class="px-4 py-3">Joining Time</th>
-                            </tr>
-                            <tbody id="new-joins-agents-list" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-                    <h3 class="font-bold text-sm mb-4 text-emerald-500">👤 Recently Joined Clients / Users</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm whitespace-nowrap">
-                            <tr class="bg-slate-100 dark:bg-slate-800/50 text-slate-500 text-xs uppercase font-semibold">
-                                <th class="px-4 py-3">Client Name</th>
-                                <th class="px-4 py-3">Phone Number</th>
-                                <th class="px-4 py-3">Assigned Agent</th>
-                                <th class="px-4 py-3">Joining Timestamp</th>
-                            </tr>
-                            <tbody id="new-joins-clients-list" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab: Live Status Updates -->
-        <div id="admin-tab-livestatus" class="flex-1 flex flex-col h-full overflow-hidden hidden">
-            <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 flex items-center justify-between px-6 shrink-0">
-                <h2 class="font-bold text-base">Real-Time Live Status Updates</h2>
-            </div>
-            <div class="flex-1 overflow-y-auto p-6 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-                        <p class="text-xs text-slate-400 font-semibold uppercase">Total Agents</p>
-                        <h3 class="text-2xl font-bold mt-2" id="stat-total-agents">0</h3>
-                    </div>
-                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-                        <p class="text-xs text-emerald-500 font-semibold uppercase">Agents Online</p>
-                        <h3 class="text-2xl font-bold mt-2 text-emerald-500" id="stat-online-agents">0</h3>
-                    </div>
-                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-                        <p class="text-xs text-amber-500 font-semibold uppercase">Active Client Chats</p>
-                        <h3 class="text-2xl font-bold mt-2 text-amber-500" id="stat-total-clients">0</h3>
-                    </div>
-                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-                        <p class="text-xs text-blue-500 font-semibold uppercase">Total Messages Exchanged</p>
-                        <h3 class="text-2xl font-bold mt-2 text-blue-500" id="stat-total-msgs">0</h3>
-                    </div>
-                </div>
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-                    <h3 class="font-bold text-sm mb-4">⚡ Real-Time Activity Feed</h3>
-                    <div class="space-y-2.5 max-h-[350px] overflow-y-auto" id="live-activity-feed">
-                        <div class="text-xs text-slate-400">Monitoring real-time actions...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab: Monitor & Client Export -->
-        <div id="admin-tab-monitor" class="flex-1 flex flex-col h-full overflow-hidden hidden">
-            <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 flex items-center justify-between px-6 shrink-0">
-                <h2 class="font-bold text-base">Signed-In Users Directory</h2>
-                <button onclick="app.exportClientsExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-sm">
-                    📥 Download Excel (CSV)
-                </button>
-            </div>
-            <div class="flex-1 overflow-y-auto p-6">
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-                    <table class="w-full text-left text-sm whitespace-nowrap">
-                        <tr class="bg-slate-100 dark:bg-slate-800/50 text-slate-500 text-xs uppercase font-semibold">
-                            <th class="px-5 py-3.5">Client Name</th>
-                            <th class="px-5 py-3.5">Phone Number</th>
-                            <th class="px-5 py-3.5">Assigned Agent</th>
-                            <th class="px-5 py-3.5">Joined Time</th>
-                        </tr>
-                        <tbody id="admin-clients-list" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- View: Agent Dashboard -->
-    <div id="view-agent-dash" class="view bg-slate-50 dark:bg-slate-950 flex-row">
-        <!-- Sidebar: Client List -->
-        <div class="w-full md:w-80 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full shrink-0 absolute md:relative z-30 -translate-x-full md:translate-x-0 transition-transform" id="agent-sidebar">
-            <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex justify-between items-center">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-full bg-amber-500 text-black font-bold flex items-center justify-center text-sm" id="agent-dash-initial">A</div>
-                    <div>
-                        <h2 class="font-bold text-xs" id="agent-dash-name">Agent</h2>
-                        <span class="text-[10px] text-emerald-500 font-semibold">● ONLINE</span>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="UI.toggleTheme()" class="p-2 rounded-lg bg-slate-200 dark:bg-slate-800 text-xs">🌓</button>
-                    <button onclick="app.logout()" class="text-xs text-slate-500 hover:text-red-500 px-2.5 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800">Logout</button>
-                </div>
-            </div>
-            <div class="p-3 border-b border-slate-200 dark:border-slate-800">
-                <p class="text-[10px] font-semibold text-slate-400 mb-1 uppercase">Exclusive Invite Link</p>
-                <div class="flex gap-2">
-                    <input type="text" id="agent-invite-link" class="w-full bg-slate-100 dark:bg-slate-800 text-amber-500 text-[11px] px-2 py-1 rounded outline-none" readonly>
-                    <button onclick="UI.copyLink('agent-invite-link')" class="bg-amber-500 hover:bg-amber-400 text-black text-xs px-2.5 py-1 rounded font-bold">Copy</button>
-                </div>
-            </div>
-            <div class="flex-1 overflow-y-auto divide-y divide-slate-200 dark:divide-slate-800" id="agent-client-list"></div>
-        </div>
-
-        <!-- Chat Panel -->
-        <div class="flex-1 flex flex-col h-full bg-white dark:bg-slate-950 relative">
-            <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center px-4 justify-between shrink-0 z-10">
-                <div class="flex items-center gap-3">
-                    <button onclick="document.getElementById('agent-sidebar').classList.remove('-translate-x-full')" class="md:hidden text-lg">☰</button>
-                    <div id="agent-active-client-info" class="flex items-center gap-3 hidden">
-                        <div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-bold text-sm" id="agent-chat-initial">C</div>
-                        <div>
-                            <h3 class="font-bold text-xs" id="agent-chat-title">Client</h3>
-                            <p class="text-[10px] text-amber-500" id="agent-chat-subtitle">Phone</p>
-                        </div>
-                    </div>
-                    <div id="agent-no-client-info" class="text-xs text-slate-500 font-medium">Select a client chat</div>
-                </div>
-                <div id="agent-chat-actions" class="hidden flex items-center gap-2">
-                    <button id="btn-mute-chat" onclick="app.toggleMuteActiveClient()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold rounded-xl">Mute Chat 🔔</button>
-                </div>
-            </div>
-
-            <div class="flex-1 p-4 overflow-y-auto flex flex-col gap-3" id="agent-chat-messages">
-                <div class="h-full flex items-center justify-center text-xs text-slate-400">Select a conversation from sidebar</div>
-            </div>
-
-            <div class="p-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 hidden" id="agent-chat-input-area">
-                <form id="form-agent-msg" class="flex gap-2 max-w-4xl mx-auto">
-                    <input type="text" id="agent-input-text" class="flex-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Type reply..." autocomplete="off">
-                    <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-black font-bold px-5 py-3 rounded-xl text-sm">Send</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- View: Client Onboarding -->
-    <div id="view-client-onboard" class="view items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
-        <div class="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl fade-in text-center">
-            <h2 class="text-xl font-bold mb-1">Live Support Secure</h2>
-            <p class="text-xs text-slate-500 mb-6">Connecting with <span id="client-agent-name" class="text-amber-500 font-bold">Agent</span></p>
-            <form id="form-client-onboard" class="space-y-4 text-left">
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Your Full Name</label>
-                    <input type="text" id="client-name" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none" required>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Phone Number</label>
-                    <input type="tel" id="client-phone" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none" required>
-                </div>
-                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-3.5 rounded-xl text-sm transition-all shadow-md mt-2">Start Chat</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- View: Client Chat -->
-    <div id="view-client-chat" class="view bg-slate-50 dark:bg-slate-950">
-        <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center px-4 justify-between shrink-0 shadow-sm">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-amber-500 text-black font-bold flex items-center justify-center text-sm relative">
-                    <span id="client-header-initial">S</span>
-                    <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
-                </div>
-                <div>
-                    <h3 class="font-bold text-xs" id="client-header-name">Support Team</h3>
-                    <p class="text-[10px] text-emerald-500 font-semibold">● Online</p>
-                </div>
-            </div>
-            <button onclick="UI.toggleTheme()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs">🌓</button>
-        </div>
-
-        <div class="flex-1 p-4 overflow-y-auto flex flex-col gap-3" id="client-chat-messages"></div>
-
-        <div class="p-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
-            <form id="form-client-msg" class="flex gap-2 max-w-4xl mx-auto">
-                <input type="text" id="client-input-text" class="flex-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Type message..." autocomplete="off">
-                <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-black font-bold px-5 py-3 rounded-xl text-sm">Send</button>
-            </form>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'support-crm-secure-v2';
-        const firebaseConfig = {
-            apiKey: "AIzaSyAwFk3Nr7pVorxDaBv042HIo1y4B4nS1qU",
-            authDomain: "portal-80bff.firebaseapp.com",
-            projectId: "portal-80bff",
-            storageBucket: "portal-80bff.firebasestorage.app",
-            messagingSenderId: "555981168566",
-            appId: "1:555981168566:web:b1f9efe5aac9249e1a2b17"
-        };
-        const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        const state = {
-            db: null, auth: null, user: null, role: null,
-            agents: [], clients: [], messages: [], mutes: {},
-            targetAgentId: null, myAgentId: null, myClientId: null,
-            adminSelectedClient: null, agentSelectedClient: null,
-            unsubscribers: []
-        };
-
-        window.UI = {
-            navigate: (id) => {
-                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-                document.getElementById(`view-${id}`).classList.add('active');
-            },
-            showToast: (msg, isErr = false) => {
-                const t = document.getElementById('toast');
-                t.textContent = msg;
-                t.className = `fixed top-5 left-1/2 transform -translate-x-1/2 px-5 py-3 rounded-xl shadow-2xl z-[150] flex items-center gap-3 text-sm font-medium border transition-all ${isErr ? 'bg-red-950 text-red-200 border-red-800' : 'bg-slate-900 text-slate-100 border-slate-700'}`;
-                t.classList.remove('hidden');
-                setTimeout(() => t.classList.add('hidden'), 3000);
-            },
-            toggleTheme: () => {
-                const isDark = document.documentElement.classList.toggle('dark');
-                localStorage.setItem('crm_theme', isDark ? 'dark' : 'light');
-            },
-            switchAdminTab: (tab) => {
-                ['agents', 'chats', 'newjoins', 'livestatus', 'monitor'].forEach(t => {
-                    const el = document.getElementById(`admin-tab-${t}`);
-                    const btn = document.getElementById(`tab-btn-${t}`);
-                    if(el) el.classList.toggle('hidden', t !== tab);
-                    if(btn) {
-                        btn.className = t === tab ? 'p-3 rounded-xl text-left bg-amber-500/10 text-amber-500 flex items-center gap-3 font-medium text-sm' : 'p-3 rounded-xl text-left text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 font-medium text-sm';
-                    }
-                });
-                if(tab === 'chats') renderAdminChatsList();
-                if(tab === 'newjoins') renderNewJoins();
-                if(tab === 'livestatus') renderLiveStatus();
-            },
-            formatTime: (ts) => ts ? new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
-            formatDate: (ts) => ts ? new Date(ts).toLocaleString() : '',
-            escape: (str) => { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; },
-            scrollBottom: (id) => { const el = document.getElementById(id); if(el) setTimeout(() => el.scrollTop = el.scrollHeight, 50); },
-            openModal: (id) => document.getElementById(`modal-${id}`).classList.remove('hidden'),
-            closeModal: (id) => document.getElementById(`modal-${id}`).classList.add('hidden'),
-            copyLink: (id) => { document.getElementById(id).select(); document.execCommand('copy'); UI.showToast("Invite link copied!"); }
-        };
-
-        if(localStorage.getItem('crm_theme') === 'light') document.documentElement.classList.remove('dark');
-
-        const getPath = (col) => `artifacts/${appId}/public/data/${col}`;
-
-        async function initApp() {
-            try {
-                const app = initializeApp(firebaseConfig);
-                state.auth = getAuth(app);
-                state.db = getFirestore(app);
-                if (authToken) await signInWithCustomToken(state.auth, authToken);
-                else await signInAnonymously(state.auth);
-                state.user = state.auth.currentUser;
-
-                startRealtimeSync();
-
-                // Check Session Storage for persistence across refresh
-                const savedRole = sessionStorage.getItem('crm_role');
-                const savedAdminUser = sessionStorage.getItem('crm_admin_user');
-                const savedAgentId = sessionStorage.getItem('crm_agent_id');
-
-                const urlParams = new URLSearchParams(window.location.search);
-                state.targetAgentId = urlParams.get('agent');
-
-                setTimeout(() => {
-                    if (state.targetAgentId && !savedRole) {
-                        handleClientRouting();
-                    } else if (savedRole === 'admin') {
-                        state.role = 'admin';
-                        const adminName = savedAdminUser || 'Admin HQ';
-                        document.getElementById('admin-brand-title').textContent = adminName;
-                        document.getElementById('admin-edit-user').value = adminName;
-                        UI.navigate('admin-dash');
-                        renderAdminAgents();
-                        renderAdminClients();
-                        renderAdminChatsList();
-                    } else if (savedRole === 'agent' && savedAgentId) {
-                        state.role = 'agent';
-                        state.myAgentId = savedAgentId;
-                        UI.navigate('agent-dash');
-                    } else {
-                        UI.navigate('landing');
-                    }
-                }, 800);
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        function startRealtimeSync() {
-            if(!state.user) return;
-            state.unsubscribers.forEach(u => u()); state.unsubscribers = [];
-
-            const unsubAgents = onSnapshot(collection(state.db, getPath('agents')), snap => {
-                state.agents = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                if(state.role === 'admin') {
-                    renderAdminAgents();
-                    renderNewJoins();
-                    renderLiveStatus();
-                }
-                if(!state.role && state.targetAgentId) handleClientRouting();
-            });
-
-            const unsubClients = onSnapshot(collection(state.db, getPath('clients')), snap => {
-                state.clients = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => (b.lastMessageTime||0)-(a.lastMessageTime||0));
-                if(state.role === 'admin') {
-                    renderAdminClients();
-                    renderAdminChatsList();
-                    renderNewJoins();
-                    renderLiveStatus();
-                }
-                if(state.role === 'agent') renderAgentClients();
-            });
-
-            const unsubMessages = onSnapshot(collection(state.db, getPath('messages')), snap => {
-                const newMsgs = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => a.timestamp-b.timestamp);
-                
-                if(state.role === 'agent' && state.myAgentId && newMsgs.length > state.messages.length) {
-                    const latest = newMsgs[newMsgs.length - 1];
-                    if(latest.sender === 'client' && latest.agentId === state.myAgentId) {
-                        if(latest.clientId !== state.agentSelectedClient && !state.mutes[latest.clientId]) {
-                            UI.showToast("New message received!");
-                        }
-                    }
-                }
-
-                state.messages = newMsgs;
-                if(state.role === 'agent') { renderAgentClients(); renderAgentChat(); }
-                if(state.role === 'admin') { 
-                    renderAdminChatsList(); 
-                    renderAdminChatMessages();
-                    renderLiveStatus();
-                }
-                if(state.role === 'client') renderClientChat();
-            });
-
-            state.unsubscribers.push(unsubAgents, unsubClients, unsubMessages);
-        }
-
-        window.app = {
-            logout: async () => {
-                if(state.role === 'agent' && state.myAgentId) {
-                    try { await updateDoc(doc(state.db, getPath('agents'), state.myAgentId), { status: 'offline', lastLogout: Date.now() }); } catch(e){}
-                }
-                sessionStorage.clear();
-                state.role = null; state.myAgentId = null; state.myClientId = null;
-                UI.navigate('landing');
-            },
-
-            updateAdminSettings: async () => {
-                const newU = document.getElementById('admin-edit-user').value.trim();
-                const oldP = document.getElementById('admin-old-pwd').value;
-                const newP = document.getElementById('admin-new-pwd').value.trim();
-                if(!newU || !oldP) { UI.showToast("Username & current password required", true); return; }
-                
-                const savedOld = localStorage.getItem('crm_admin_pwd') || 'password123';
-                if(oldP !== savedOld) { UI.showToast("Incorrect current password", true); return; }
-
-                if(newP) localStorage.setItem('crm_admin_pwd', newP);
-                localStorage.setItem('crm_admin_user', newU);
-                sessionStorage.setItem('crm_admin_user', newU);
-
-                document.getElementById('admin-brand-title').textContent = newU;
-                UI.closeModal('admin-settings');
-                UI.showToast("Admin profile updated successfully!");
-            },
-
-            openEditAgentModal: (id, name, username) => {
-                document.getElementById('modal-edit-agent-id').value = id;
-                document.getElementById('modal-edit-agt-name').value = name;
-                document.getElementById('modal-edit-agt-user').value = username;
-                document.getElementById('modal-edit-agt-pwd').value = '';
-                document.getElementById('modal-edit-agent-sub').textContent = `Editing: @${username}`;
-                UI.openModal('edit-agent');
-            },
-
-            confirmEditAgent: async () => {
-                const id = document.getElementById('modal-edit-agent-id').value;
-                const name = document.getElementById('modal-edit-agt-name').value.trim();
-                const username = document.getElementById('modal-edit-agt-user').value.trim();
-                const pwd = document.getElementById('modal-edit-agt-pwd').value.trim();
-                if(!name || !username) { UI.showToast("Name and username are required", true); return; }
-
-                const updateData = { name, username };
-                if(pwd) updateData.password = pwd;
-
-                try {
-                    await updateDoc(doc(state.db, getPath('agents'), id), updateData);
-                    UI.closeModal('edit-agent');
-                    UI.showToast("Agent updated successfully!");
-                } catch(e) { UI.showToast("Failed to update agent", true); }
-            },
-
-            removeAgent: async (id, name) => {
-                if(!confirm(`Are you sure you want to remove agent "${name}"?`)) return;
-                try {
-                    await deleteDoc(doc(state.db, getPath('agents'), id));
-                    UI.showToast("Agent removed successfully!");
-                } catch(e) { UI.showToast("Failed to remove agent", true); }
-            },
-
-            exportClientsExcel: () => {
-                let csv = "Client Name,Phone Number,Assigned Agent,Joined Time\n";
-                state.clients.forEach(c => {
-                    const ag = state.agents.find(a => a.id === c.agentId);
-                    csv += `"${c.name}","${c.phone}","${ag ? ag.name : 'Unknown'}","${new Date(c.createdAt).toLocaleString()}"\n`;
-                });
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.setAttribute('href', url);
-                a.setAttribute('download', 'signed_in_clients.csv');
-                a.click();
-            },
-
-            toggleMuteActiveClient: () => {
-                if(!state.agentSelectedClient) return;
-                state.mutes[state.agentSelectedClient] = !state.mutes[state.agentSelectedClient];
-                const btn = document.getElementById('btn-mute-chat');
-                btn.textContent = state.mutes[state.agentSelectedClient] ? "Unmute Chat 🔕" : "Mute Chat 🔔";
-                UI.showToast(state.mutes[state.agentSelectedClient] ? "Chat muted" : "Chat unmuted");
-            },
-
-            adminSelectClientChat: (clientId) => {
-                state.adminSelectedClient = clientId;
-                renderAdminChatsList();
-                renderAdminChatMessages();
-            },
-
-            agentSelectClient: async (clientId) => {
-                state.agentSelectedClient = clientId;
-                if(window.innerWidth < 768) document.getElementById('agent-sidebar').classList.add('-translate-x-full');
-                
-                const client = state.clients.find(c => c.id === clientId);
-                if(client) {
-                    document.getElementById('agent-active-client-info').classList.remove('hidden');
-                    document.getElementById('agent-no-client-info').classList.add('hidden');
-                    document.getElementById('agent-chat-actions').classList.remove('hidden');
-                    document.getElementById('agent-chat-title').textContent = client.name;
-                    document.getElementById('agent-chat-subtitle').textContent = client.phone;
-                    document.getElementById('agent-chat-initial').textContent = client.name.charAt(0).toUpperCase();
-                    document.getElementById('agent-chat-input-area').classList.remove('hidden');
-                    
-                    const btnMute = document.getElementById('btn-mute-chat');
-                    btnMute.textContent = state.mutes[clientId] ? "Unmute Chat 🔕" : "Mute Chat 🔔";
-
-                    const unreadMsgs = state.messages.filter(m => m.clientId === clientId && m.sender === 'client' && !m.seen);
-                    for(let m of unreadMsgs) {
-                        try { await updateDoc(doc(state.db, getPath('messages'), m.id), { seen: true }); } catch(e){}
-                    }
-                }
-                renderAgentClients(); renderAgentChat();
-            }
-        };
-
-        document.getElementById('form-admin-login').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const u = document.getElementById('admin-user').value.trim();
-            const p = document.getElementById('admin-pwd').value;
-            const realPwd = localStorage.getItem('crm_admin_pwd') || 'password123';
-            const adminUser = localStorage.getItem('crm_admin_user') || 'admin';
-            if(u === adminUser && p === realPwd) {
-                state.role = 'admin';
-                sessionStorage.setItem('crm_role', 'admin');
-                sessionStorage.setItem('crm_admin_user', adminUser);
-
-                document.getElementById('admin-brand-title').textContent = adminUser;
-                document.getElementById('admin-edit-user').value = adminUser;
-
-                UI.navigate('admin-dash');
-                renderAdminAgents();
-                renderAdminClients();
-                renderAdminChatsList();
-            } else { UI.showToast("Invalid Admin credentials", true); }
-        });
-
-        document.getElementById('form-create-agent').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const n = document.getElementById('new-agt-name').value.trim();
-            const u = document.getElementById('new-agt-user').value.trim();
-            const p = document.getElementById('new-agt-pwd').value.trim();
-            if(!n || !u || !p) return;
-            try {
-                const id = 'agt_' + Math.random().toString(36).substr(2,9);
-                await setDoc(doc(state.db, getPath('agents'), id), {
-                    name: n, username: u, password: p, status: 'offline', lastLogin: null, lastLogout: null, createdAt: Date.now()
-                });
-                document.getElementById('form-create-agent').reset();
-                UI.showToast("Agent created successfully!");
-            } catch(e) { UI.showToast("Error creating agent", true); }
-        });
-
-        document.getElementById('form-agent-login').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const u = document.getElementById('agent-user').value.trim();
-            const p = document.getElementById('agent-pwd').value.trim();
-            const agent = state.agents.find(a => a.username === u && a.password === p);
-            if(agent) {
-                state.role = 'agent';
-                state.myAgentId = agent.id;
-                sessionStorage.setItem('crm_role', 'agent');
-                sessionStorage.setItem('crm_agent_id', agent.id);
-
-                try {
-                    await updateDoc(doc(state.db, getPath('agents'), agent.id), { status: 'online', lastLogin: Date.now() });
-                } catch(e){}
-                document.getElementById('agent-dash-name').textContent = agent.name;
-                document.getElementById('agent-dash-initial').textContent = agent.name.charAt(0).toUpperCase();
-                document.getElementById('agent-invite-link').value = `${window.location.origin}${window.location.pathname}?agent=${agent.id}`;
-                UI.navigate('agent-dash');
-                renderAgentClients();
-            } else { UI.showToast("Invalid credentials", true); }
-        });
-
-        document.getElementById('form-agent-msg').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if(!state.agentSelectedClient || state.role !== 'agent') return;
-            const input = document.getElementById('agent-input-text');
-            const txt = input.value.trim();
-            if(!txt) return;
-            input.value = '';
-            try {
-                await addDoc(collection(state.db, getPath('messages')), {
-                    clientId: state.agentSelectedClient, agentId: state.myAgentId, sender: 'agent', text: txt, timestamp: Date.now(), seen: false
-                });
-                await updateDoc(doc(state.db, getPath('clients'), state.agentSelectedClient), { lastMessage: txt, lastMessageTime: Date.now() });
-            } catch(e) { UI.showToast("Failed to send", true); }
-        });
-
-        document.getElementById('form-client-onboard').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const n = document.getElementById('client-name').value.trim();
-            const p = document.getElementById('client-phone').value.trim();
-            if(!n || !p || !state.targetAgentId) return;
-            try {
-                const cid = 'cli_' + Math.random().toString(36).substr(2,10);
-                await setDoc(doc(state.db, getPath('clients'), cid), {
-                    agentId: state.targetAgentId, name: n, phone: p, createdAt: Date.now(), lastMessage: 'Joined', lastMessageTime: Date.now()
-                });
-                localStorage.setItem(`crm_client_lock_${state.targetAgentId}`, cid);
-                state.myClientId = cid;
-                state.role = 'client';
-                UI.navigate('client-chat');
-                renderClientChat();
-            } catch(e) { UI.showToast("Onboarding failed", true); }
-        });
-
-        document.getElementById('form-client-msg').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if(!state.myClientId || state.role !== 'client') return;
-            const input = document.getElementById('client-input-text');
-            const txt = input.value.trim();
-            if(!txt) return;
-            input.value = '';
-            try {
-                await addDoc(collection(state.db, getPath('messages')), {
-                    clientId: state.myClientId, agentId: state.targetAgentId, sender: 'client', text: txt, timestamp: Date.now(), seen: false
-                });
-                await updateDoc(doc(state.db, getPath('clients'), state.myClientId), { lastMessage: txt, lastMessageTime: Date.now() });
-            } catch(e) { UI.showToast("Failed to send", true); }
-        });
-
-        function renderAdminAgents() {
-            const tbody = document.getElementById('admin-agents-list');
-            if(!tbody || state.role !== 'admin') return;
-            let html = '';
-            state.agents.forEach(a => {
-                const isOnline = a.status === 'online';
-                html += `
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                        <td class="px-5 py-4 font-medium">${UI.escape(a.name)} <span class="text-xs text-slate-400 block">@${UI.escape(a.username)}</span></td>
-                        <td class="px-5 py-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${isOnline ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/10 text-slate-500'}">${isOnline ? 'Online' : 'Offline'}</span></td>
-                        <td class="px-5 py-4 text-xs text-slate-500">In: ${a.lastLogin ? new Date(a.lastLogin).toLocaleTimeString() : 'Never'}<br>Out: ${a.lastLogout ? new Date(a.lastLogout).toLocaleTimeString() : 'N/A'}</td>
-                        <td class="px-5 py-4 text-right space-x-2">
-                            <button onclick="app.openEditAgentModal('${a.id}', '${UI.escape(a.name)}', '${UI.escape(a.username)}')" class="text-xs bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-black px-3 py-1.5 rounded-xl font-medium">Edit</button>
-                            <button onclick="app.removeAgent('${a.id}', '${UI.escape(a.name)}')" class="text-xs bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-xl font-medium">Remove</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html || `<tr><td colspan="4" class="px-5 py-6 text-center text-slate-400">No agents found</td></tr>`;
-        }
-
-        function renderAdminClients() {
-            const tbody = document.getElementById('admin-clients-list');
-            if(!tbody || state.role !== 'admin') return;
-            let html = '';
-            state.clients.forEach(c => {
-                const ag = state.agents.find(a => a.id === c.agentId);
-                html += `
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                        <td class="px-5 py-4 font-medium">${UI.escape(c.name)}</td>
-                        <td class="px-5 py-4 text-slate-500">${UI.escape(c.phone)}</td>
-                        <td class="px-5 py-4 text-amber-500 font-medium">${ag ? UI.escape(ag.name) : 'Unassigned'}</td>
-                        <td class="px-5 py-4 text-xs text-slate-400">${new Date(c.createdAt).toLocaleString()}</td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html || `<tr><td colspan="4" class="px-5 py-6 text-center text-slate-400">No users signed in yet</td></tr>`;
-        }
-
-        function renderNewJoins() {
-            const agTbody = document.getElementById('new-joins-agents-list');
-            const cliTbody = document.getElementById('new-joins-clients-list');
-            if(state.role !== 'admin') return;
-
-            // Agents sorted by creation time
-            const sortedAgents = [...state.agents].sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-            let agHtml = '';
-            sortedAgents.forEach(a => {
-                agHtml += `
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                        <td class="px-4 py-3 font-medium">${UI.escape(a.name)}</td>
-                        <td class="px-4 py-3 text-slate-500">@${UI.escape(a.username)}</td>
-                        <td class="px-4 py-3 text-xs text-amber-500 font-semibold">${UI.formatDate(a.createdAt)}</td>
-                    </tr>
-                `;
-            });
-            if(agTbody) agTbody.innerHTML = agHtml || `<tr><td colspan="3" class="px-4 py-4 text-center text-slate-400">No agents joined yet</td></tr>`;
-
-            // Clients sorted by creation time
-            const sortedClients = [...state.clients].sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-            let cliHtml = '';
-            sortedClients.forEach(c => {
-                const ag = state.agents.find(a => a.id === c.agentId);
-                cliHtml += `
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                        <td class="px-4 py-3 font-medium">${UI.escape(c.name)}</td>
-                        <td class="px-4 py-3 text-slate-500">${UI.escape(c.phone)}</td>
-                        <td class="px-4 py-3 text-amber-500 font-medium">${ag ? UI.escape(ag.name) : 'Unknown'}</td>
-                        <td class="px-4 py-3 text-xs text-emerald-500 font-semibold">${UI.formatDate(c.createdAt)}</td>
-                    </tr>
-                `;
-            });
-            if(cliTbody) cliTbody.innerHTML = cliHtml || `<tr><td colspan="4" class="px-4 py-4 text-center text-slate-400">No users signed in yet</td></tr>`;
-        }
-
-        function renderLiveStatus() {
-            if(state.role !== 'admin') return;
-            const totalAg = state.agents.length;
-            const onlineAg = state.agents.filter(a => a.status === 'online').length;
-            const totalCli = state.clients.length;
-            const totalMsgs = state.messages.length;
-
-            document.getElementById('stat-total-agents').textContent = totalAg;
-            document.getElementById('stat-online-agents').textContent = onlineAg;
-            document.getElementById('stat-total-clients').textContent = totalCli;
-            document.getElementById('stat-total-msgs').textContent = totalMsgs;
-
-            const feed = document.getElementById('live-activity-feed');
-            let feedHtml = '';
-            
-            // Combine recent events
-            const events = [];
-            state.agents.forEach(a => {
-                if(a.createdAt) events.push({ time: a.createdAt, text: `New Agent Registered: <strong>${a.name}</strong> (@${a.username})` });
-                if(a.lastLogin) events.push({ time: a.lastLogin, text: `Agent Logged In: <strong>${a.name}</strong>` });
-            });
-            state.clients.forEach(c => {
-                if(events.push({ time: c.createdAt, text: `New Client Connected: <strong>${c.name}</strong> (${c.phone})` }));
-            });
-            state.messages.slice(-15).reverse().forEach(m => {
-                events.push({ time: m.timestamp, text: `New message sent in conversation (${m.sender.toUpperCase()})` });
-            });
-
-            events.sort((a,b) => b.time - a.time).slice(0, 10).forEach(ev => {
-                feedHtml += `
-                    <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl text-xs">
-                        <span>${ev.text}</span>
-                        <span class="text-[10px] text-slate-400 font-mono">${UI.formatDate(ev.time)}</span>
-                    </div>
-                `;
-            });
-            if(feed) feed.innerHTML = feedHtml || `<div class="text-xs text-slate-400">No recent activity</div>`;
-        }
-
-        function renderAdminChatsList() {
-            const list = document.getElementById('admin-chat-client-list');
-            if(!list || state.role !== 'admin') return;
-            let html = '';
-            state.clients.forEach(c => {
-                const sel = state.adminSelectedClient === c.id;
-                const ag = state.agents.find(a => a.id === c.agentId);
-                html += `
-                    <button onclick="app.adminSelectClientChat('${c.id}')" class="w-full text-left p-4 hover:bg-slate-100 dark:hover:bg-slate-800/50 flex flex-col gap-1 ${sel ? 'bg-amber-500/10 border-l-4 border-amber-500' : ''}">
-                        <div class="flex justify-between items-center">
-                            <span class="font-bold text-xs truncate">${UI.escape(c.name)}</span>
-                            <span class="text-[9px] text-amber-500 font-semibold">Agent: ${ag ? UI.escape(ag.name) : 'N/A'}</span>
-                        </div>
-                        <span class="text-[10px] text-slate-400 truncate">${UI.escape(c.lastMessage || 'No messages')}</span>
-                    </button>
-                `;
-            });
-            list.innerHTML = html || `<div class="p-6 text-center text-slate-400 text-xs">No client chats available.</div>`;
-        }
-
-        function renderAdminChatMessages() {
-            const view = document.getElementById('admin-chat-messages');
-            const header = document.getElementById('admin-chat-header-info');
-            if(!view || state.role !== 'admin') return;
-            
-            if(!state.adminSelectedClient) {
-                view.innerHTML = `<div class="h-full flex items-center justify-center text-xs text-slate-400">Choose a client from the left list</div>`;
-                header.innerHTML = `<span class="text-xs text-slate-500 font-medium">Select a conversation to monitor</span>`;
-                return;
-            }
-
-            const client = state.clients.find(c => c.id === state.adminSelectedClient);
-            const ag = client ? state.agents.find(a => a.id === client.agentId) : null;
-            if(client) {
-                header.innerHTML = `<div class="flex items-center gap-2"><span class="font-bold text-xs">${UI.escape(client.name)}</span> <span class="text-[10px] text-slate-400">(${client.phone})</span> <span class="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded font-semibold">Agent: ${ag ? ag.name : 'Unknown'}</span></div>`;
-            }
-
-            const msgs = state.messages.filter(m => m.clientId === state.adminSelectedClient);
-            let html = '';
-            msgs.forEach(m => {
-                const isClient = m.sender === 'client';
-                html += `
-                    <div class="flex w-full ${isClient ? 'justify-start' : 'justify-end'} fade-in">
-                        <div class="max-w-[75%] rounded-2xl px-4 py-3 ${isClient ? 'bg-slate-100 dark:bg-slate-800' : 'bg-amber-500 text-black'}">
-                            <div class="text-[10px] font-bold mb-1 opacity-75">${isClient ? 'Client' : 'Agent'}</div>
-                            <div class="text-xs break-words">${UI.escape(m.text)}</div>
-                            <div class="text-[9px] text-right mt-1 opacity-60 font-semibold">${UI.formatTime(m.timestamp)}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            view.innerHTML = html || `<div class="h-full flex items-center justify-center text-xs text-slate-400">No messages in this chat.</div>`;
-            UI.scrollBottom('admin-chat-messages');
-        }
-
-        function renderAgentClients() {
-            const list = document.getElementById('agent-client-list');
-            if(!list || state.role !== 'agent') return;
-            const myClients = state.clients.filter(c => c.agentId === state.myAgentId);
-            let html = '';
-            myClients.forEach(c => {
-                const sel = state.agentSelectedClient === c.id;
-                const unreadCount = state.messages.filter(m => m.clientId === c.id && m.sender === 'client' && !m.seen).length;
-                const isMuted = state.mutes[c.id];
-                html += `
-                    <button onclick="app.agentSelectClient('${c.id}')" class="w-full text-left p-4 hover:bg-slate-100 dark:hover:bg-slate-800/50 flex flex-col gap-1 ${sel ? 'bg-amber-500/10 border-l-4 border-amber-500' : ''}">
-                        <div class="flex justify-between items-center">
-                            <span class="font-bold text-xs truncate">${UI.escape(c.name)}</span>
-                            <div class="flex items-center gap-1">
-                                ${isMuted ? '<span class="text-[10px]">🔕</span>' : ''}
-                                ${unreadCount > 0 ? `<span class="bg-amber-500 text-black font-bold text-[10px] px-1.5 py-0.5 rounded-full">${unreadCount}</span>` : ''}
-                            </div>
-                        </div>
-                        <span class="text-[10px] text-amber-500 font-mono">${UI.escape(c.phone)}</span>
-                        <span class="text-[10px] text-slate-400 truncate">${UI.escape(c.lastMessage || '')}</span>
-                    </button>
-                `;
-            });
-            list.innerHTML = html || `<div class="p-6 text-center text-slate-400 text-xs">No clients assigned yet.</div>`;
-        }
-
-        function renderAgentChat() {
-            const view = document.getElementById('agent-chat-messages');
-            if(!view || !state.agentSelectedClient || state.role !== 'agent') return;
-            const msgs = state.messages.filter(m => m.clientId === state.agentSelectedClient);
-            let html = '';
-            msgs.forEach(m => {
-                const isMe = m.sender === 'agent';
-                html += `
-                    <div class="flex w-full ${isMe ? 'justify-end' : 'justify-start'} fade-in">
-                        <div class="max-w-[75%] rounded-2xl px-4 py-3 ${isMe ? 'bg-amber-500 text-black' : 'bg-slate-100 dark:bg-slate-800'}">
-                            <div class="text-xs break-words">${UI.escape(m.text)}</div>
-                            <div class="text-[9px] text-right mt-1 opacity-60 font-semibold">${UI.formatTime(m.timestamp)} ${isMe ? (m.seen ? '✓✓ Seen' : '✓ Sent') : ''}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            view.innerHTML = html || `<div class="h-full flex items-center justify-center text-xs text-slate-400">No messages yet.</div>`;
-            UI.scrollBottom('agent-chat-messages');
-        }
-
-        function handleClientRouting() {
-            if(state.role === 'client') return;
-            const agent = state.agents.find(a => a.id === state.targetAgentId);
-            if(!agent) {
-                document.getElementById('view-landing').innerHTML = `<div class="text-red-500 text-xs text-center p-6">Invalid or broken agent invite link.</div>`;
-                return;
-            }
-
-            const lockedClientId = localStorage.getItem(`crm_client_lock_${state.targetAgentId}`);
-            if(lockedClientId) {
-                state.myClientId = lockedClientId;
-                state.role = 'client';
-                UI.navigate('client-chat');
-                renderClientChat();
-                return;
-            }
-
-            document.getElementById('client-agent-name').textContent = agent.name;
-            UI.navigate('client-onboard');
-        }
-
-        function renderClientChat() {
-            const view = document.getElementById('client-chat-messages');
-            if(!view || !state.myClientId || state.role !== 'client') return;
-            const msgs = state.messages.filter(m => m.clientId === state.myClientId);
-            let html = '';
-            msgs.forEach(m => {
-                const isMe = m.sender === 'client';
-                html += `
-                    <div class="flex w-full ${isMe ? 'justify-end' : 'justify-start'} fade-in">
-                        <div class="max-w-[75%] rounded-2xl px-4 py-3 ${isMe ? 'bg-amber-500 text-black' : 'bg-slate-100 dark:bg-slate-800'}">
-                            <div class="text-xs break-words">${UI.escape(m.text)}</div>
-                            <div class="text-[9px] text-right mt-1 opacity-60 font-semibold">${UI.formatTime(m.timestamp)} ${isMe ? (m.seen ? '✓✓ Seen' : '✓ Sent') : ''}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            view.innerHTML = html || `<div class="h-full flex items-center justify-center text-xs text-slate-400">Say hello to support!</div>`;
-            UI.scrollBottom('client-chat-messages');
-        }
-
-        initApp();
-    </script>
-</body>
-</html>
+export default LiveChatsDashboard;
