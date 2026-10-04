@@ -193,18 +193,20 @@
             </div>
         </div>
 
-        <!-- Tab: Admin Live Chats Monitoring -->
+        <!-- Tab: Admin Live Chats Monitoring (UPDATED HIERARCHY) -->
         <div id="admin-tab-chats" class="flex-1 flex flex-row h-full overflow-hidden hidden bg-white dark:bg-slate-950">
             <div class="w-80 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full bg-slate-50 dark:bg-slate-900">
-                <div class="p-4 border-b border-slate-200 dark:border-slate-800 font-bold text-xs uppercase text-slate-500">Active Client Conversations</div>
+                <div id="admin-chat-sidebar-header" class="p-4 border-b border-slate-200 dark:border-slate-800 font-bold text-xs uppercase text-slate-500 flex justify-between items-center">
+                    <span>SELECT AGENT</span>
+                </div>
                 <div class="flex-1 overflow-y-auto divide-y divide-slate-200 dark:divide-slate-800" id="admin-chat-client-list"></div>
             </div>
             <div class="flex-1 flex flex-col h-full relative">
                 <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center px-6 justify-between">
-                    <div id="admin-chat-header-info" class="text-xs text-slate-500 font-medium">Select a conversation to monitor</div>
+                    <div id="admin-chat-header-info" class="text-xs text-slate-500 font-medium">Select an Agent to view conversations</div>
                 </div>
                 <div class="flex-1 p-4 overflow-y-auto flex flex-col gap-3" id="admin-chat-messages">
-                    <div class="h-full flex items-center justify-center text-xs text-slate-400">Choose a client from the left list</div>
+                    <div class="h-full flex items-center justify-center text-xs text-slate-400">Choose an Agent from the left list</div>
                 </div>
             </div>
         </div>
@@ -465,6 +467,7 @@
             db: null, auth: null, user: null, role: null,
             agents: [], clients: [], messages: [], mutes: {},
             targetAgentId: null, myAgentId: null, myClientId: null,
+            adminSelectedAgentId: null, // Track currently selected agent in Live Chats
             adminSelectedClient: null, agentSelectedClient: null,
             unsubscribers: []
         };
@@ -494,7 +497,10 @@
                         btn.className = t === tab ? 'p-3 rounded-xl text-left bg-amber-500/10 text-amber-500 flex items-center gap-3 font-medium text-sm' : 'p-3 rounded-xl text-left text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 font-medium text-sm';
                     }
                 });
-                if(tab === 'chats') renderAdminChatsList();
+                if(tab === 'chats') {
+                    renderAdminChatsList();
+                    renderAdminChatMessages();
+                }
                 if(tab === 'newjoins') renderNewJoins();
                 if(tab === 'livestatus') renderLiveStatus();
             },
@@ -503,7 +509,7 @@
             escape: (str) => { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; },
             scrollBottom: (id) => { const el = document.getElementById(id); if(el) setTimeout(() => el.scrollTop = el.scrollHeight, 50); },
             openModal: (id) => document.getElementById(`modal-${id}`).classList.remove('hidden'),
-            closeModal: (id) => document.getElementById(`modal-${id}`).classList.add('hidden'),
+            closeModal: (id) => document.getElementById(`modal-${id}`).add ? document.getElementById(`modal-${id}`).classList.add('hidden') : document.getElementById(`modal-${id}`).classList.add('hidden'),
             copyLink: (id) => { document.getElementById(id).select(); document.execCommand('copy'); UI.showToast("Invite link copied!"); },
             toggleAgentRightPanel: () => {
                 const panel = document.getElementById('agent-right-panel');
@@ -568,6 +574,7 @@
                     renderAdminAgents();
                     renderNewJoins();
                     renderLiveStatus();
+                    renderAdminChatsList();
                 }
                 if(!state.role && state.targetAgentId) handleClientRouting();
             });
@@ -690,6 +697,22 @@
                 const btn = document.getElementById('btn-mute-chat');
                 btn.textContent = state.mutes[state.agentSelectedClient] ? "Unmute Chat 🔕" : "Mute Chat 🔔";
                 UI.showToast(state.mutes[state.agentSelectedClient] ? "Chat muted" : "Chat unmuted");
+            },
+
+            // Select Agent in Admin Live Chats
+            adminSelectAgent: (agentId) => {
+                state.adminSelectedAgentId = agentId;
+                state.adminSelectedClient = null;
+                renderAdminChatsList();
+                renderAdminChatMessages();
+            },
+
+            // Clear Agent selection to go back to Agents List
+            adminClearSelectedAgent: () => {
+                state.adminSelectedAgentId = null;
+                state.adminSelectedClient = null;
+                renderAdminChatsList();
+                renderAdminChatMessages();
             },
 
             adminSelectClientChat: (clientId) => {
@@ -838,7 +861,6 @@
             if(!n || !p || !state.targetAgentId) return;
 
             try {
-                // Check if client with same phone already exists to avoid duplicate entries
                 let existingClient = state.clients.find(c => c.phone === p && c.agentId === state.targetAgentId);
                 let cid;
 
@@ -989,57 +1011,107 @@
             if(feed) feed.innerHTML = feedHtml || `<div class="text-xs text-slate-400">No recent activity</div>`;
         }
 
+        // Render Live Chats sidebar (Level 1: Agents List OR Level 2: Clients of selected Agent)
         function renderAdminChatsList() {
             const list = document.getElementById('admin-chat-client-list');
+            const header = document.getElementById('admin-chat-sidebar-header');
             if(!list || state.role !== 'admin') return;
-            let html = '';
 
-            // Group clients by phone number to eliminate duplicate UI list items
-            const uniqueClientsMap = new Map();
-            state.clients.forEach(c => {
-                if (!uniqueClientsMap.has(c.phone) || (c.lastMessageTime || 0) > (uniqueClientsMap.get(c.phone).lastMessageTime || 0)) {
-                    uniqueClientsMap.set(c.phone, c);
+            if (!state.adminSelectedAgentId) {
+                // STEP 1: Show list of all Agents
+                if (header) {
+                    header.innerHTML = `<span>Select Agent</span> <span class="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded font-bold">${state.agents.length} Agents</span>`;
                 }
-            });
 
-            const uniqueClients = Array.from(uniqueClientsMap.values()).sort((a,b) => (b.lastMessageTime||0)-(a.lastMessageTime||0));
+                let html = '';
+                state.agents.forEach(a => {
+                    const agentClients = state.clients.filter(c => c.agentId === a.id);
+                    const uniquePhones = new Set(agentClients.map(c => c.phone)).size;
+                    const isOnline = a.status === 'online';
 
-            uniqueClients.forEach(c => {
-                const sel = state.adminSelectedClient === c.id;
-                const ag = state.agents.find(a => a.id === c.agentId);
-                html += `
-                    <button onclick="app.adminSelectClientChat('${c.id}')" class="w-full text-left p-4 hover:bg-slate-100 dark:hover:bg-slate-800/50 flex flex-col gap-1 ${sel ? 'bg-amber-500/10 border-l-4 border-amber-500' : ''}">
-                        <div class="flex justify-between items-center">
-                            <span class="font-bold text-xs truncate">${UI.escape(c.name)}</span>
-                            <span class="text-[9px] text-amber-500 font-semibold">Agent: ${ag ? UI.escape(ag.name) : 'N/A'}</span>
-                        </div>
-                        <span class="text-[10px] text-slate-400 truncate">${UI.escape(c.lastMessage || 'No messages')}</span>
-                    </button>
-                `;
-            });
-            list.innerHTML = html || `<div class="p-6 text-center text-slate-400 text-xs">No client chats available.</div>`;
+                    html += `
+                        <button onclick="app.adminSelectAgent('${a.id}')" class="w-full text-left p-4 hover:bg-slate-100 dark:hover:bg-slate-800/50 flex items-center justify-between transition-colors">
+                            <div>
+                                <div class="font-bold text-xs flex items-center gap-2">
+                                    <span>${UI.escape(a.name)}</span>
+                                    <span class="w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-slate-400'}"></span>
+                                </div>
+                                <div class="text-[10px] text-slate-400">@${UI.escape(a.username)}</div>
+                            </div>
+                            <span class="text-[10px] bg-amber-500/10 text-amber-500 font-bold px-2.5 py-1 rounded-full">
+                                ${uniquePhones} Clients
+                            </span>
+                        </button>
+                    `;
+                });
+                list.innerHTML = html || `<div class="p-6 text-center text-slate-400 text-xs">No agents created yet.</div>`;
+            } else {
+                // STEP 2: Show list of Clients under Selected Agent
+                const currentAgent = state.agents.find(a => a.id === state.adminSelectedAgentId);
+                const agentName = currentAgent ? currentAgent.name : 'Agent';
+
+                if (header) {
+                    header.innerHTML = `
+                        <button onclick="app.adminClearSelectedAgent()" class="flex items-center gap-1 text-amber-500 hover:text-amber-400 font-bold text-xs">
+                            ← Back to Agents
+                        </button>
+                        <span class="font-bold text-xs truncate max-w-[120px] text-slate-700 dark:text-slate-300">${UI.escape(agentName)}</span>
+                    `;
+                }
+
+                const myClients = state.clients.filter(c => c.agentId === state.adminSelectedAgentId);
+                const uniqueClientsMap = new Map();
+                myClients.forEach(c => {
+                    if (!uniqueClientsMap.has(c.phone) || (c.lastMessageTime || 0) > (uniqueClientsMap.get(c.phone).lastMessageTime || 0)) {
+                        uniqueClientsMap.set(c.phone, c);
+                    }
+                });
+
+                const uniqueClients = Array.from(uniqueClientsMap.values()).sort((a,b) => (b.lastMessageTime||0)-(a.lastMessageTime||0));
+
+                let html = '';
+                uniqueClients.forEach(c => {
+                    const sel = state.adminSelectedClient === c.id;
+                    html += `
+                        <button onclick="app.adminSelectClientChat('${c.id}')" class="w-full text-left p-4 hover:bg-slate-100 dark:hover:bg-slate-800/50 flex flex-col gap-1 ${sel ? 'bg-amber-500/10 border-l-4 border-amber-500' : ''}">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-xs truncate">${UI.escape(c.name)}</span>
+                                <span class="text-[10px] text-amber-500 font-mono">${UI.escape(c.phone)}</span>
+                            </div>
+                            <span class="text-[10px] text-slate-400 truncate">${UI.escape(c.lastMessage || 'No messages')}</span>
+                        </button>
+                    `;
+                });
+                list.innerHTML = html || `<div class="p-6 text-center text-slate-400 text-xs">No clients found for this agent.</div>`;
+            }
         }
 
+        // Render Chat Messages panel for Admin
         function renderAdminChatMessages() {
             const view = document.getElementById('admin-chat-messages');
             const header = document.getElementById('admin-chat-header-info');
             if(!view || state.role !== 'admin') return;
-            
+
+            if(!state.adminSelectedAgentId) {
+                view.innerHTML = `<div class="h-full flex items-center justify-center text-xs text-slate-400">Please select an Agent from the left list</div>`;
+                if(header) header.innerHTML = `<span class="text-xs text-slate-500 font-medium">Select an Agent to view conversations</span>`;
+                return;
+            }
+
             if(!state.adminSelectedClient) {
-                view.innerHTML = `<div class="h-full flex items-center justify-center text-xs text-slate-400">Choose a client from the left list</div>`;
-                header.innerHTML = `<span class="text-xs text-slate-500 font-medium">Select a conversation to monitor</span>`;
+                const currentAgent = state.agents.find(a => a.id === state.adminSelectedAgentId);
+                view.innerHTML = `<div class="h-full flex items-center justify-center text-xs text-slate-400">Select a client under ${currentAgent ? UI.escape(currentAgent.name) : 'Agent'} to view chat</div>`;
+                if(header) header.innerHTML = `<span class="text-xs text-slate-500 font-medium">Viewing clients of Agent: ${currentAgent ? UI.escape(currentAgent.name) : ''}</span>`;
                 return;
             }
 
             const client = state.clients.find(c => c.id === state.adminSelectedClient);
             const ag = client ? state.agents.find(a => a.id === client.agentId) : null;
-            if(client) {
-                header.innerHTML = `<div class="flex items-center gap-2"><span class="font-bold text-xs">${UI.escape(client.name)}</span> <span class="text-[10px] text-slate-400">(${client.phone})</span> <span class="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded font-semibold">Agent: ${ag ? ag.name : 'Unknown'}</span></div>`;
+            if(client && header) {
+                header.innerHTML = `<div class="flex items-center gap-2"><span class="font-bold text-xs">${UI.escape(client.name)}</span> <span class="text-[10px] text-slate-400">(${client.phone})</span> <span class="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded font-semibold">Agent: ${ag ? UI.escape(ag.name) : 'Unknown'}</span></div>`;
             }
 
-            // Get all client IDs matching the same phone number to include previous conversations
             const matchingClientIds = client ? state.clients.filter(c => c.phone === client.phone).map(c => c.id) : [state.adminSelectedClient];
-
             const msgs = state.messages.filter(m => matchingClientIds.includes(m.clientId));
             let html = '';
             msgs.forEach(m => {
