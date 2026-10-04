@@ -37,7 +37,7 @@
         <span id="toast-msg"></span>
     </div>
 
-    <!-- Modal: Admin Settings (Change Name & Password) -->
+    <!-- Modal: Admin Settings -->
     <div id="modal-admin-settings" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl fade-in">
             <h3 class="text-lg font-bold mb-2">Admin Profile Settings</h3>
@@ -209,7 +209,7 @@
             </div>
         </div>
 
-        <!-- Tab: New Joins (Agents & Users with Timings) -->
+        <!-- Tab: New Joins -->
         <div id="admin-tab-newjoins" class="flex-1 flex flex-col h-full overflow-hidden hidden">
             <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 flex items-center justify-between px-6 shrink-0">
                 <h2 class="font-bold text-base">New Joins Directory (Agents & Users)</h2>
@@ -367,7 +367,6 @@
                 <span>Client Profile & Tools</span>
             </div>
             <div class="p-4 flex-1 overflow-y-auto space-y-5">
-                <!-- Client Details Card -->
                 <div id="right-client-details" class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 space-y-2">
                     <div class="w-12 h-12 rounded-full bg-amber-500 text-black font-bold text-lg flex items-center justify-center mx-auto mb-2" id="right-panel-avatar">C</div>
                     <h4 class="font-bold text-sm text-center" id="right-panel-name">No Client Selected</h4>
@@ -377,7 +376,6 @@
                     </div>
                 </div>
 
-                <!-- Quick Replies Templates -->
                 <div>
                     <h5 class="text-[11px] font-bold text-slate-400 uppercase mb-2">⚡ Quick Replies</h5>
                     <div class="space-y-1.5" id="quick-replies-list">
@@ -393,7 +391,6 @@
                     </div>
                 </div>
 
-                <!-- Client Notes -->
                 <div>
                     <h5 class="text-[11px] font-bold text-slate-400 uppercase mb-2">📝 Client Notes</h5>
                     <textarea id="agent-client-notes" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs outline-none focus:border-amber-500 resize-none h-24" placeholder="Add notes about this client..."></textarea>
@@ -529,7 +526,6 @@
 
                 startRealtimeSync();
 
-                // Check Session Storage for persistence across refresh
                 const savedRole = sessionStorage.getItem('crm_role');
                 const savedAdminUser = sessionStorage.getItem('crm_admin_user');
                 const savedAgentId = sessionStorage.getItem('crm_agent_id');
@@ -716,7 +712,6 @@
                     document.getElementById('agent-chat-initial').textContent = client.name.charAt(0).toUpperCase();
                     document.getElementById('agent-chat-input-area').classList.remove('hidden');
                     
-                    // Update Right Column Info
                     const rAvatar = document.getElementById('right-panel-avatar');
                     const rName = document.getElementById('right-panel-name');
                     const rPhone = document.getElementById('right-panel-phone');
@@ -841,11 +836,25 @@
             const n = document.getElementById('client-name').value.trim();
             const p = document.getElementById('client-phone').value.trim();
             if(!n || !p || !state.targetAgentId) return;
+
             try {
-                const cid = 'cli_' + Math.random().toString(36).substr(2,10);
-                await setDoc(doc(state.db, getPath('clients'), cid), {
-                    agentId: state.targetAgentId, name: n, phone: p, createdAt: Date.now(), lastMessage: 'Joined', lastMessageTime: Date.now()
-                });
+                // Check if client with same phone already exists to avoid duplicate entries
+                let existingClient = state.clients.find(c => c.phone === p && c.agentId === state.targetAgentId);
+                let cid;
+
+                if (existingClient) {
+                    cid = existingClient.id;
+                    await updateDoc(doc(state.db, getPath('clients'), cid), {
+                        name: n,
+                        lastMessageTime: Date.now()
+                    });
+                } else {
+                    cid = 'cli_' + Math.random().toString(36).substr(2,10);
+                    await setDoc(doc(state.db, getPath('clients'), cid), {
+                        agentId: state.targetAgentId, name: n, phone: p, createdAt: Date.now(), lastMessage: 'Joined', lastMessageTime: Date.now()
+                    });
+                }
+
                 localStorage.setItem(`crm_client_lock_${state.targetAgentId}`, cid);
                 state.myClientId = cid;
                 state.role = 'client';
@@ -913,7 +922,6 @@
             const cliTbody = document.getElementById('new-joins-clients-list');
             if(state.role !== 'admin') return;
 
-            // Agents sorted by creation time
             const sortedAgents = [...state.agents].sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
             let agHtml = '';
             sortedAgents.forEach(a => {
@@ -927,7 +935,6 @@
             });
             if(agTbody) agTbody.innerHTML = agHtml || `<tr><td colspan="3" class="px-4 py-4 text-center text-slate-400">No agents joined yet</td></tr>`;
 
-            // Clients sorted by creation time
             const sortedClients = [...state.clients].sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
             let cliHtml = '';
             sortedClients.forEach(c => {
@@ -959,14 +966,13 @@
             const feed = document.getElementById('live-activity-feed');
             let feedHtml = '';
             
-            // Combine recent events
             const events = [];
             state.agents.forEach(a => {
                 if(a.createdAt) events.push({ time: a.createdAt, text: `New Agent Registered: <strong>${a.name}</strong> (@${a.username})` });
                 if(a.lastLogin) events.push({ time: a.lastLogin, text: `Agent Logged In: <strong>${a.name}</strong>` });
             });
             state.clients.forEach(c => {
-                if(events.push({ time: c.createdAt, text: `New Client Connected: <strong>${c.name}</strong> (${c.phone})` }));
+                events.push({ time: c.createdAt, text: `New Client Connected: <strong>${c.name}</strong> (${c.phone})` });
             });
             state.messages.slice(-15).reverse().forEach(m => {
                 events.push({ time: m.timestamp, text: `New message sent in conversation (${m.sender.toUpperCase()})` });
@@ -987,7 +993,18 @@
             const list = document.getElementById('admin-chat-client-list');
             if(!list || state.role !== 'admin') return;
             let html = '';
+
+            // Group clients by phone number to eliminate duplicate UI list items
+            const uniqueClientsMap = new Map();
             state.clients.forEach(c => {
+                if (!uniqueClientsMap.has(c.phone) || (c.lastMessageTime || 0) > (uniqueClientsMap.get(c.phone).lastMessageTime || 0)) {
+                    uniqueClientsMap.set(c.phone, c);
+                }
+            });
+
+            const uniqueClients = Array.from(uniqueClientsMap.values()).sort((a,b) => (b.lastMessageTime||0)-(a.lastMessageTime||0));
+
+            uniqueClients.forEach(c => {
                 const sel = state.adminSelectedClient === c.id;
                 const ag = state.agents.find(a => a.id === c.agentId);
                 html += `
@@ -1020,7 +1037,10 @@
                 header.innerHTML = `<div class="flex items-center gap-2"><span class="font-bold text-xs">${UI.escape(client.name)}</span> <span class="text-[10px] text-slate-400">(${client.phone})</span> <span class="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded font-semibold">Agent: ${ag ? ag.name : 'Unknown'}</span></div>`;
             }
 
-            const msgs = state.messages.filter(m => m.clientId === state.adminSelectedClient);
+            // Get all client IDs matching the same phone number to include previous conversations
+            const matchingClientIds = client ? state.clients.filter(c => c.phone === client.phone).map(c => c.id) : [state.adminSelectedClient];
+
+            const msgs = state.messages.filter(m => matchingClientIds.includes(m.clientId));
             let html = '';
             msgs.forEach(m => {
                 const isClient = m.sender === 'client';
@@ -1042,8 +1062,18 @@
             const list = document.getElementById('agent-client-list');
             if(!list || state.role !== 'agent') return;
             const myClients = state.clients.filter(c => c.agentId === state.myAgentId);
-            let html = '';
+            
+            const uniqueClientsMap = new Map();
             myClients.forEach(c => {
+                if (!uniqueClientsMap.has(c.phone) || (c.lastMessageTime || 0) > (uniqueClientsMap.get(c.phone).lastMessageTime || 0)) {
+                    uniqueClientsMap.set(c.phone, c);
+                }
+            });
+
+            const uniqueClients = Array.from(uniqueClientsMap.values()).sort((a,b) => (b.lastMessageTime||0)-(a.lastMessageTime||0));
+
+            let html = '';
+            uniqueClients.forEach(c => {
                 const sel = state.agentSelectedClient === c.id;
                 const unreadCount = state.messages.filter(m => m.clientId === c.id && m.sender === 'client' && !m.seen).length;
                 const isMuted = state.mutes[c.id];
@@ -1067,7 +1097,11 @@
         function renderAgentChat() {
             const view = document.getElementById('agent-chat-messages');
             if(!view || !state.agentSelectedClient || state.role !== 'agent') return;
-            const msgs = state.messages.filter(m => m.clientId === state.agentSelectedClient);
+
+            const client = state.clients.find(c => c.id === state.agentSelectedClient);
+            const matchingClientIds = client ? state.clients.filter(c => c.phone === client.phone).map(c => c.id) : [state.agentSelectedClient];
+
+            const msgs = state.messages.filter(m => matchingClientIds.includes(m.clientId));
             let html = '';
             msgs.forEach(m => {
                 const isMe = m.sender === 'agent';
@@ -1108,7 +1142,11 @@
         function renderClientChat() {
             const view = document.getElementById('client-chat-messages');
             if(!view || !state.myClientId || state.role !== 'client') return;
-            const msgs = state.messages.filter(m => m.clientId === state.myClientId);
+
+            const currentClient = state.clients.find(c => c.id === state.myClientId);
+            const matchingClientIds = currentClient ? state.clients.filter(c => c.phone === currentClient.phone).map(c => c.id) : [state.myClientId];
+
+            const msgs = state.messages.filter(m => matchingClientIds.includes(m.clientId));
             let html = '';
             msgs.forEach(m => {
                 const isMe = m.sender === 'client';
