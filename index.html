@@ -405,7 +405,6 @@
             const unsubMessages = onSnapshot(collection(state.db, getPath('messages')), snap => {
                 const newMsgs = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => a.timestamp-b.timestamp);
                 
-                // Check if agent got a new message for notification/unread
                 if(state.role === 'agent' && state.myAgentId && newMsgs.length > state.messages.length) {
                     const latest = newMsgs[newMsgs.length - 1];
                     if(latest.sender === 'client' && latest.agentId === state.myAgentId) {
@@ -493,7 +492,6 @@
                     const btnMute = document.getElementById('btn-mute-chat');
                     btnMute.textContent = state.mutes[clientId] ? "Unmute Chat 🔕" : "Mute Chat 🔔";
 
-                    // Mark messages as seen
                     const unreadMsgs = state.messages.filter(m => m.clientId === clientId && m.sender === 'client' && !m.seen);
                     for(let m of unreadMsgs) {
                         try { await updateDoc(doc(state.db, getPath('messages'), m.id), { seen: true }); } catch(e){}
@@ -503,7 +501,6 @@
             }
         };
 
-        // Form Handlers
         document.getElementById('form-admin-login').addEventListener('submit', (e) => {
             e.preventDefault();
             const u = document.getElementById('admin-user').value;
@@ -600,7 +597,6 @@
             } catch(e) { UI.showToast("Failed to send", true); }
         });
 
-        // Render Functions
         function renderAdminAgents() {
             const tbody = document.getElementById('admin-agents-list');
             if(!tbody || state.role !== 'admin') return;
@@ -693,7 +689,6 @@
                 return;
             }
 
-            // Strict Agent-Client Isolation Check via localStorage lock
             const lockedClientId = localStorage.getItem(`crm_client_lock_${state.targetAgentId}`);
             if(lockedClientId) {
                 state.myClientId = lockedClientId;
