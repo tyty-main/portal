@@ -304,7 +304,7 @@
 
     <!-- View: Agent Dashboard -->
     <div id="view-agent-dash" class="view bg-slate-50 dark:bg-slate-950 flex-row">
-        <!-- Sidebar: Client List -->
+        <!-- Sidebar: Client List (Left Column) -->
         <div class="w-full md:w-80 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full shrink-0 absolute md:relative z-30 -translate-x-full md:translate-x-0 transition-transform" id="agent-sidebar">
             <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex justify-between items-center">
                 <div class="flex items-center gap-2.5">
@@ -329,8 +329,8 @@
             <div class="flex-1 overflow-y-auto divide-y divide-slate-200 dark:divide-slate-800" id="agent-client-list"></div>
         </div>
 
-        <!-- Chat Panel -->
-        <div class="flex-1 flex flex-col h-full bg-white dark:bg-slate-950 relative">
+        <!-- Chat Panel (Middle Column) -->
+        <div class="flex-1 flex flex-col h-full bg-white dark:bg-slate-950 relative border-r border-slate-200 dark:border-slate-800">
             <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center px-4 justify-between shrink-0 z-10">
                 <div class="flex items-center gap-3">
                     <button onclick="document.getElementById('agent-sidebar').classList.remove('-translate-x-full')" class="md:hidden text-lg">☰</button>
@@ -344,6 +344,7 @@
                     <div id="agent-no-client-info" class="text-xs text-slate-500 font-medium">Select a client chat</div>
                 </div>
                 <div id="agent-chat-actions" class="hidden flex items-center gap-2">
+                    <button id="btn-toggle-right-panel" onclick="UI.toggleAgentRightPanel()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold rounded-xl">Profile Info ℹ️</button>
                     <button id="btn-mute-chat" onclick="app.toggleMuteActiveClient()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold rounded-xl">Mute Chat 🔔</button>
                 </div>
             </div>
@@ -357,6 +358,47 @@
                     <input type="text" id="agent-input-text" class="flex-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Type reply..." autocomplete="off">
                     <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-black font-bold px-5 py-3 rounded-xl text-sm">Send</button>
                 </form>
+            </div>
+        </div>
+
+        <!-- Client Details & Quick Replies (Right Column) -->
+        <div id="agent-right-panel" class="w-80 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col h-full shrink-0 hidden lg:flex">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-800 font-bold text-xs uppercase text-slate-400 flex justify-between items-center">
+                <span>Client Profile & Tools</span>
+            </div>
+            <div class="p-4 flex-1 overflow-y-auto space-y-5">
+                <!-- Client Details Card -->
+                <div id="right-client-details" class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 space-y-2">
+                    <div class="w-12 h-12 rounded-full bg-amber-500 text-black font-bold text-lg flex items-center justify-center mx-auto mb-2" id="right-panel-avatar">C</div>
+                    <h4 class="font-bold text-sm text-center" id="right-panel-name">No Client Selected</h4>
+                    <p class="text-xs text-amber-500 text-center font-mono" id="right-panel-phone">-</p>
+                    <div class="text-[11px] text-slate-400 text-center pt-2 border-t border-slate-200 dark:border-slate-700/50">
+                        Joined: <span id="right-panel-joined" class="text-slate-300">-</span>
+                    </div>
+                </div>
+
+                <!-- Quick Replies Templates -->
+                <div>
+                    <h5 class="text-[11px] font-bold text-slate-400 uppercase mb-2">⚡ Quick Replies</h5>
+                    <div class="space-y-1.5" id="quick-replies-list">
+                        <button onclick="app.sendQuickReply('Hello! How can I help you today?')" class="w-full text-left p-2.5 text-xs bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/20 hover:text-amber-500 rounded-xl transition-all border border-slate-200 dark:border-slate-700/40">
+                            👋 Hello! How can I help you today?
+                        </button>
+                        <button onclick="app.sendQuickReply('Please wait a moment while I check your details.')" class="w-full text-left p-2.5 text-xs bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/20 hover:text-amber-500 rounded-xl transition-all border border-slate-200 dark:border-slate-700/40">
+                            ⏳ Please wait a moment...
+                        </button>
+                        <button onclick="app.sendQuickReply('Thank you for contacting support! Have a great day.')" class="w-full text-left p-2.5 text-xs bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/20 hover:text-amber-500 rounded-xl transition-all border border-slate-200 dark:border-slate-700/40">
+                            ✅ Thank you!
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Client Notes -->
+                <div>
+                    <h5 class="text-[11px] font-bold text-slate-400 uppercase mb-2">📝 Client Notes</h5>
+                    <textarea id="agent-client-notes" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs outline-none focus:border-amber-500 resize-none h-24" placeholder="Add notes about this client..."></textarea>
+                    <button onclick="app.saveClientNotes()" class="w-full mt-2 bg-amber-500 hover:bg-amber-400 text-black font-semibold py-2 rounded-xl text-xs">Save Notes</button>
+                </div>
             </div>
         </div>
     </div>
@@ -465,7 +507,11 @@
             scrollBottom: (id) => { const el = document.getElementById(id); if(el) setTimeout(() => el.scrollTop = el.scrollHeight, 50); },
             openModal: (id) => document.getElementById(`modal-${id}`).classList.remove('hidden'),
             closeModal: (id) => document.getElementById(`modal-${id}`).classList.add('hidden'),
-            copyLink: (id) => { document.getElementById(id).select(); document.execCommand('copy'); UI.showToast("Invite link copied!"); }
+            copyLink: (id) => { document.getElementById(id).select(); document.execCommand('copy'); UI.showToast("Invite link copied!"); },
+            toggleAgentRightPanel: () => {
+                const panel = document.getElementById('agent-right-panel');
+                if(panel) panel.classList.toggle('hidden');
+            }
         };
 
         if(localStorage.getItem('crm_theme') === 'light') document.documentElement.classList.remove('dark');
@@ -670,6 +716,19 @@
                     document.getElementById('agent-chat-initial').textContent = client.name.charAt(0).toUpperCase();
                     document.getElementById('agent-chat-input-area').classList.remove('hidden');
                     
+                    // Update Right Column Info
+                    const rAvatar = document.getElementById('right-panel-avatar');
+                    const rName = document.getElementById('right-panel-name');
+                    const rPhone = document.getElementById('right-panel-phone');
+                    const rJoined = document.getElementById('right-panel-joined');
+                    const rNotes = document.getElementById('agent-client-notes');
+
+                    if(rAvatar) rAvatar.textContent = client.name.charAt(0).toUpperCase();
+                    if(rName) rName.textContent = client.name;
+                    if(rPhone) rPhone.textContent = client.phone;
+                    if(rJoined) rJoined.textContent = UI.formatDate(client.createdAt);
+                    if(rNotes) rNotes.value = localStorage.getItem(`crm_note_${clientId}`) || '';
+
                     const btnMute = document.getElementById('btn-mute-chat');
                     btnMute.textContent = state.mutes[clientId] ? "Unmute Chat 🔕" : "Mute Chat 🔔";
 
@@ -679,6 +738,27 @@
                     }
                 }
                 renderAgentClients(); renderAgentChat();
+            },
+
+            sendQuickReply: async (msgText) => {
+                if(!state.agentSelectedClient || state.role !== 'agent') {
+                    UI.showToast("Please select a client first", true);
+                    return;
+                }
+                try {
+                    await addDoc(collection(state.db, getPath('messages')), {
+                        clientId: state.agentSelectedClient, agentId: state.myAgentId, sender: 'agent', text: msgText, timestamp: Date.now(), seen: false
+                    });
+                    await updateDoc(doc(state.db, getPath('clients'), state.agentSelectedClient), { lastMessage: msgText, lastMessageTime: Date.now() });
+                    UI.showToast("Quick reply sent!");
+                } catch(e) { UI.showToast("Failed to send quick reply", true); }
+            },
+
+            saveClientNotes: () => {
+                if(!state.agentSelectedClient) { UI.showToast("No client selected", true); return; }
+                const noteText = document.getElementById('agent-client-notes').value.trim();
+                localStorage.setItem(`crm_note_${state.agentSelectedClient}`, noteText);
+                UI.showToast("Client notes saved!");
             }
         };
 
