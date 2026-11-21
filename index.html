@@ -103,8 +103,16 @@
         </div>
     </div>
 
+    <!-- View: Clean Loading Screen (Prevents Admin/Agent Flash on Client Links) -->
+    <div id="view-loading" class="view active items-center justify-center p-4">
+        <div class="text-center fade-in space-y-3">
+            <div class="w-12 h-12 mx-auto border-4 border-amber-500/30 border-t-amber-500 rounded-full animate-spin"></div>
+            <p class="text-xs text-slate-400 font-medium" id="loading-status-text">Connecting to support...</p>
+        </div>
+    </div>
+
     <!-- View: Landing Portal Selection -->
-    <div id="view-landing" class="view active items-center justify-center p-4 relative overflow-y-auto">
+    <div id="view-landing" class="view items-center justify-center p-4 relative overflow-y-auto">
         <button onclick="UI.toggleTheme()" class="absolute top-6 right-6 p-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:scale-105 transition-all">
             <svg class="w-5 h-5 theme-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
         </button>
@@ -450,6 +458,11 @@
         </div>
     </div>
 
+    <!-- View: Client Invalid Link -->
+    <div id="view-client-invalid" class="view items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
+        <div class="text-red-500 text-xs text-center p-6 font-medium">Invalid or broken agent invite link.</div>
+    </div>
+
     <!-- View: Client Chat -->
     <div id="view-client-chat" class="view bg-slate-50 dark:bg-slate-950">
         <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center px-4 justify-between shrink-0 shadow-sm">
@@ -495,7 +508,7 @@
 
         const state = {
             db: null, auth: null, user: null, role: null,
-            agents: [], clients: [], messages: [], mutes: {},
+            agents: [], agentsLoaded: false, clients: [], messages: [], mutes: {},
             autoMessage: localStorage.getItem('crm_client_auto_msg') || DEFAULT_AUTO_MESSAGE,
             targetAgentId: null, myAgentId: null, myClientId: null,
             adminSelectedAgentId: null,
@@ -506,7 +519,8 @@
         window.UI = {
             navigate: (id) => {
                 document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-                document.getElementById(`view-${id}`).classList.add('active');
+                const target = document.getElementById(`view-${id}`);
+                if(target) target.classList.add('active');
             },
             showToast: (msg, isErr = false) => {
                 const t = document.getElementById('toast');
@@ -566,6 +580,28 @@
         const getPath = (col) => `artifacts/${appId}/public/data/${col}`;
 
         async function initApp() {
+            const savedRole = sessionStorage.getItem('crm_role');
+            const savedAdminUser = sessionStorage.getItem('crm_admin_user');
+            const savedAgentId = sessionStorage.getItem('crm_agent_id');
+            const urlParams = new URLSearchParams(window.location.search);
+            state.targetAgentId = urlParams.get('agent');
+
+            // Route immediately if staff session already exists; keep clean loading view for client links
+            if (savedRole === 'admin') {
+                state.role = 'admin';
+                const adminName = savedAdminUser || 'Admin HQ';
+                document.getElementById('admin-brand-title').textContent = adminName;
+                document.getElementById('admin-edit-user').value = adminName;
+                document.getElementById('admin-auto-msg').value = state.autoMessage;
+                UI.navigate('admin-dash');
+            } else if (savedRole === 'agent' && savedAgentId) {
+                state.role = 'agent';
+                state.myAgentId = savedAgentId;
+                UI.navigate('agent-dash');
+            } else if (!state.targetAgentId) {
+                UI.navigate('landing');
+            }
+
             try {
                 const app = initializeApp(firebaseConfig);
                 state.auth = getAuth(app);
@@ -575,37 +611,11 @@
                 state.user = state.auth.currentUser;
 
                 startRealtimeSync();
-
-                const savedRole = sessionStorage.getItem('crm_role');
-                const savedAdminUser = sessionStorage.getItem('crm_admin_user');
-                const savedAgentId = sessionStorage.getItem('crm_agent_id');
-
-                const urlParams = new URLSearchParams(window.location.search);
-                state.targetAgentId = urlParams.get('agent');
-
-                setTimeout(() => {
-                    if (state.targetAgentId && !savedRole) {
-                        handleClientRouting();
-                    } else if (savedRole === 'admin') {
-                        state.role = 'admin';
-                        const adminName = savedAdminUser || 'Admin HQ';
-                        document.getElementById('admin-brand-title').textContent = adminName;
-                        document.getElementById('admin-edit-user').value = adminName;
-                        document.getElementById('admin-auto-msg').value = state.autoMessage;
-                        UI.navigate('admin-dash');
-                        renderAdminAgents();
-                        renderAdminClients();
-                        renderAdminChatsList();
-                    } else if (savedRole === 'agent' && savedAgentId) {
-                        state.role = 'agent';
-                        state.myAgentId = savedAgentId;
-                        UI.navigate('agent-dash');
-                    } else {
-                        UI.navigate('landing');
-                    }
-                }, 800);
             } catch (err) {
                 console.error(err);
+                if (state.targetAgentId && !state.role) {
+                    UI.navigate('client-invalid');
+                }
             }
         }
 
@@ -629,12 +639,16 @@
 
             const unsubAgents = onSnapshot(collection(state.db, getPath('agents')), snap => {
                 state.agents = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                state.agentsLoaded = true;
                 if(state.role === 'admin') {
                     renderAdminAgents();
                     renderNewJoins();
                     renderLiveStatus();
                     renderAdminChatsList();
                 }
+                if(!state.role && state.targetAgentId) handleClientRouting();
+            }, () => {
+                state.agentsLoaded = true;
                 if(!state.role && state.targetAgentId) handleClientRouting();
             });
 
@@ -1289,9 +1303,13 @@
 
         function handleClientRouting() {
             if(state.role === 'client') return;
+            if(!state.agentsLoaded) {
+                UI.navigate('loading');
+                return;
+            }
             const agent = state.agents.find(a => a.id === state.targetAgentId);
             if(!agent) {
-                document.getElementById('view-landing').innerHTML = `<div class="text-red-500 text-xs text-center p-6">Invalid or broken agent invite link.</div>`;
+                UI.navigate('client-invalid');
                 return;
             }
 
