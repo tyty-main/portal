@@ -54,33 +54,90 @@
         <span id="toast-msg"></span>
     </div>
 
-    <!-- Modal: Admin Settings (Includes Client Auto-Message Config) -->
+    <!-- Modal: Admin Settings, Pre-Chat Form Builder & Roles/Permissions -->
     <div id="modal-admin-settings" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl fade-in max-h-[90vh] overflow-y-auto">
-            <h3 class="text-lg font-bold mb-1">Admin Profile & Auto-Message Settings</h3>
-            <p class="text-xs text-slate-500 mb-4">Update admin credentials and client pre-chat auto message.</p>
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Client Pre-Chat Auto Message (Meta Ads)</label>
-                    <input type="text" id="admin-auto-msg" class="w-full bg-slate-100 dark:bg-slate-800 border border-amber-500/50 rounded-xl px-4 py-3 text-sm outline-none focus:border-amber-500" placeholder="Hi need more details on this.">
-                    <p class="text-[10px] text-slate-400 mt-1">Client pre-chat form submit karte hi yeh message client ki taraf se send hoga.</p>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-lg shadow-2xl fade-in max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold mb-1">Admin Control: Pre-Chat, Button & Permissions</h3>
+            <p class="text-xs text-slate-500 mb-4">Modify client pre-chat form, submit button label, auto-message, and role permissions anytime without touching code.</p>
+
+            <div class="space-y-4">
+                <!-- Pre-Chat Form & Button Configuration -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-3">
+                    <h4 class="text-xs font-bold uppercase text-amber-500">1. Pre-Chat Form & CTA Button</h4>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Pre-Chat Form Heading</label>
+                        <input type="text" id="admin-prechat-title" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-amber-500" placeholder="Live Support Secure">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Pre-Chat Subtitle</label>
+                        <input type="text" id="admin-prechat-subtitle" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-amber-500" placeholder="Connecting with">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Submit Button Text (Shown to Client)</label>
+                        <input type="text" id="admin-btn-label" class="w-full bg-white dark:bg-slate-900 border border-amber-500/60 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-amber-500" placeholder="Hi, I want new gaming ID.">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Auto-Sent Message on Click</label>
+                        <input type="text" id="admin-auto-msg" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-amber-500" placeholder="Hi, I want new gaming ID.">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs">
+                        <label class="flex items-center justify-between bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer">
+                            <span>Show Name Field</span>
+                            <input type="checkbox" id="perm-show-name" class="accent-amber-500 w-4 h-4">
+                        </label>
+                        <label class="flex items-center justify-between bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer">
+                            <span>Name Required</span>
+                            <input type="checkbox" id="perm-req-name" class="accent-amber-500 w-4 h-4">
+                        </label>
+                        <label class="flex items-center justify-between bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer">
+                            <span>Show Phone Field</span>
+                            <input type="checkbox" id="perm-show-phone" class="accent-amber-500 w-4 h-4">
+                        </label>
+                        <label class="flex items-center justify-between bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer">
+                            <span>Phone Required</span>
+                            <input type="checkbox" id="perm-req-phone" class="accent-amber-500 w-4 h-4">
+                        </label>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Admin Username</label>
-                    <input type="text" id="admin-edit-user" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-amber-500">
+
+                <!-- Roles & Access Permissions -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-2.5">
+                    <h4 class="text-xs font-bold uppercase text-emerald-500">2. Roles & Access Permissions</h4>
+                    <label class="flex items-center justify-between bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs cursor-pointer">
+                        <span>Mask Client Phone in Agent View (e.g. XXXXXX1234)</span>
+                        <input type="checkbox" id="perm-mask-agent-phone" class="accent-amber-500 w-4 h-4">
+                    </label>
+                    <label class="flex items-center justify-between bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs cursor-pointer">
+                        <span>Allow Agents to View Invite Link</span>
+                        <input type="checkbox" id="perm-agent-invite" class="accent-amber-500 w-4 h-4">
+                    </label>
+                    <label class="flex items-center justify-between bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs cursor-pointer">
+                        <span>Allow Clients to Send Follow-Up Messages</span>
+                        <input type="checkbox" id="perm-client-chat" class="accent-amber-500 w-4 h-4">
+                    </label>
                 </div>
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Current Password</label>
-                    <input type="password" id="admin-old-pwd" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-amber-500" placeholder="Required to save changes">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">New Password (Optional)</label>
-                    <input type="password" id="admin-new-pwd" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-amber-500" placeholder="Leave blank to keep current">
+
+                <!-- Admin Account Credentials -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-3">
+                    <h4 class="text-xs font-bold uppercase text-slate-400">3. Admin Credentials</h4>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Admin Username</label>
+                        <input type="text" id="admin-edit-user" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Current Password</label>
+                        <input type="password" id="admin-old-pwd" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-amber-500" placeholder="Required to save changes">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">New Password (Optional)</label>
+                        <input type="password" id="admin-new-pwd" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-amber-500" placeholder="Leave blank to keep current">
+                    </div>
                 </div>
             </div>
+
             <div class="flex gap-3 justify-end mt-5">
                 <button onclick="UI.closeModal('admin-settings')" class="px-4 py-2 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-white">Cancel</button>
-                <button onclick="app.updateAdminSettings()" class="bg-amber-500 text-black font-semibold px-4 py-2 rounded-xl text-sm hover:bg-amber-400">Save Changes</button>
+                <button onclick="app.updateAdminSettings()" class="bg-amber-500 text-black font-semibold px-5 py-2 rounded-xl text-sm hover:bg-amber-400">Save All Settings</button>
             </div>
         </div>
     </div>
@@ -103,11 +160,11 @@
         </div>
     </div>
 
-    <!-- View: Clean Loading Screen (Prevents Admin/Agent Flash on Client Links) -->
+    <!-- View: Clean Loading Screen -->
     <div id="view-loading" class="view active items-center justify-center p-4">
         <div class="text-center fade-in space-y-3">
             <div class="w-12 h-12 mx-auto border-4 border-amber-500/30 border-t-amber-500 rounded-full animate-spin"></div>
-            <p class="text-xs text-slate-400 font-medium" id="loading-status-text">Connecting to support...</p>
+            <p class="text-xs text-slate-400 font-medium">Connecting to support...</p>
         </div>
     </div>
 
@@ -188,7 +245,7 @@
                 </button>
             </div>
             <div class="hidden md:flex p-3 border-t border-slate-200 dark:border-slate-800 flex-col gap-2 mt-auto">
-                <button onclick="UI.openModal('admin-settings')" class="w-full py-2.5 px-3 text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-center">Settings / Auto-Msg</button>
+                <button onclick="UI.openModal('admin-settings')" class="w-full py-2.5 px-3 text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-center">Pre-Chat & Permissions</button>
                 <button onclick="app.logout()" class="w-full py-2.5 px-3 text-xs font-semibold text-red-500 hover:bg-red-500/10 rounded-xl text-center">Logout</button>
             </div>
         </nav>
@@ -359,7 +416,7 @@
                     <button onclick="app.logout()" class="text-xs text-slate-500 hover:text-red-500 px-2.5 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800">Logout</button>
                 </div>
             </div>
-            <div class="p-3 border-b border-slate-200 dark:border-slate-800">
+            <div class="p-3 border-b border-slate-200 dark:border-slate-800" id="agent-invite-box">
                 <p class="text-[10px] font-semibold text-slate-400 mb-1 uppercase">Exclusive Invite Link</p>
                 <div class="flex gap-2">
                     <input type="text" id="agent-invite-link" class="w-full bg-slate-100 dark:bg-slate-800 text-amber-500 text-[11px] px-2 py-1 rounded outline-none" readonly>
@@ -439,21 +496,21 @@
         </div>
     </div>
 
-    <!-- View: Client Pre-Chat Form (Name + Mobile Number) -->
+    <!-- View: Client Pre-Chat Form -->
     <div id="view-client-onboard" class="view items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 overflow-y-auto">
         <div class="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl fade-in text-center">
-            <h2 class="text-xl font-bold mb-1">Live Support Secure</h2>
-            <p class="text-xs text-slate-500 mb-6">Connecting with <span id="client-agent-name" class="text-amber-500 font-bold">Agent</span></p>
+            <h2 class="text-xl font-bold mb-1" id="client-onboard-title">Live Support Secure</h2>
+            <p class="text-xs text-slate-500 mb-6"><span id="client-onboard-subtitle">Connecting with</span> <span id="client-agent-name" class="text-amber-500 font-bold">Agent</span></p>
             <form id="form-client-onboard" class="space-y-4 text-left">
-                <div>
+                <div id="field-group-name">
                     <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Your Full Name</label>
-                    <input type="text" id="client-name" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Enter your name" required>
+                    <input type="text" id="client-name" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Enter your name">
                 </div>
-                <div>
+                <div id="field-group-phone">
                     <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Phone Number</label>
-                    <input type="tel" id="client-phone" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Enter mobile number" required>
+                    <input type="tel" id="client-phone" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Enter mobile number">
                 </div>
-                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-3.5 rounded-xl text-sm transition-all shadow-md mt-2">Start Chat</button>
+                <button type="submit" id="client-prechat-submit-btn" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-3.5 rounded-xl text-sm transition-all shadow-md mt-2">Hi, I want new gaming ID.</button>
             </form>
         </div>
     </div>
@@ -481,7 +538,7 @@
 
         <div class="flex-1 p-4 overflow-y-auto flex flex-col gap-3" id="client-chat-messages"></div>
 
-        <div class="p-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
+        <div class="p-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0" id="client-chat-input-wrapper">
             <form id="form-client-msg" class="flex gap-2 max-w-4xl mx-auto">
                 <input type="text" id="client-input-text" class="flex-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Type message..." autocomplete="off">
                 <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-black font-bold px-5 py-3 rounded-xl text-sm">Send</button>
@@ -494,7 +551,21 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const DEFAULT_AUTO_MESSAGE = "Hi need more details on this.";
+        const DEFAULT_PRECHAT_TEXT = "Hi, I want new gaming ID.";
+        const DEFAULT_CONFIG = {
+            prechatTitle: "Live Support Secure",
+            prechatSubtitle: "Connecting with",
+            buttonLabel: DEFAULT_PRECHAT_TEXT,
+            autoMessage: DEFAULT_PRECHAT_TEXT,
+            showName: true,
+            requireName: true,
+            showPhone: true,
+            requirePhone: true,
+            maskAgentPhone: true,
+            allowAgentInvite: true,
+            allowClientChat: true
+        };
+
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'support-crm-secure-v2';
         const firebaseConfig = {
             apiKey: "AIzaSyAwFk3Nr7pVorxDaBv042HIo1y4B4nS1qU",
@@ -506,15 +577,86 @@
         };
         const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
+        const savedLocalConfig = JSON.parse(localStorage.getItem('crm_portal_config') || '{}');
+
         const state = {
             db: null, auth: null, user: null, role: null,
             agents: [], agentsLoaded: false, clients: [], messages: [], mutes: {},
-            autoMessage: localStorage.getItem('crm_client_auto_msg') || DEFAULT_AUTO_MESSAGE,
+            config: { ...DEFAULT_CONFIG, ...savedLocalConfig },
             targetAgentId: null, myAgentId: null, myClientId: null,
             adminSelectedAgentId: null,
             adminSelectedClient: null, agentSelectedClient: null,
             unsubscribers: []
         };
+
+        function maskPhoneDisplay(phone) {
+            if (!state.config.maskAgentPhone) return phone || '';
+            const clean = String(phone || '');
+            if (clean.length <= 4) return 'XXXXXX' + clean;
+            return 'XXXXXX' + clean.slice(-4);
+        }
+
+        function applyPrechatAndPermissionsUI() {
+            const cfg = state.config;
+
+            const titleEl = document.getElementById('client-onboard-title');
+            const subEl = document.getElementById('client-onboard-subtitle');
+            const btnEl = document.getElementById('client-prechat-submit-btn');
+            const nameGroup = document.getElementById('field-group-name');
+            const nameInput = document.getElementById('client-name');
+            const phoneGroup = document.getElementById('field-group-phone');
+            const phoneInput = document.getElementById('client-phone');
+
+            if (titleEl) titleEl.textContent = cfg.prechatTitle || DEFAULT_CONFIG.prechatTitle;
+            if (subEl) subEl.textContent = cfg.prechatSubtitle || DEFAULT_CONFIG.prechatSubtitle;
+            if (btnEl) btnEl.textContent = cfg.buttonLabel || DEFAULT_PRECHAT_TEXT;
+
+            if (nameGroup && nameInput) {
+                nameGroup.classList.toggle('hidden', !cfg.showName);
+                nameInput.required = Boolean(cfg.showName && cfg.requireName);
+            }
+            if (phoneGroup && phoneInput) {
+                phoneGroup.classList.toggle('hidden', !cfg.showPhone);
+                phoneInput.required = Boolean(cfg.showPhone && cfg.requirePhone);
+            }
+
+            const inviteBox = document.getElementById('agent-invite-box');
+            if (inviteBox) {
+                inviteBox.classList.toggle('hidden', !cfg.allowAgentInvite);
+            }
+
+            const clientChatWrapper = document.getElementById('client-chat-input-wrapper');
+            if (clientChatWrapper) {
+                clientChatWrapper.classList.toggle('hidden', !cfg.allowClientChat);
+            }
+
+            if (state.role === 'agent') {
+                renderAgentClients();
+                if (state.agentSelectedClient) {
+                    const client = state.clients.find(c => c.id === state.agentSelectedClient);
+                    if (client) {
+                        document.getElementById('agent-chat-subtitle').textContent = maskPhoneDisplay(client.phone);
+                        const rPhone = document.getElementById('right-panel-phone');
+                        if (rPhone) rPhone.textContent = maskPhoneDisplay(client.phone);
+                    }
+                }
+            }
+        }
+
+        function populateSettingsModal() {
+            const cfg = state.config;
+            document.getElementById('admin-prechat-title').value = cfg.prechatTitle || DEFAULT_CONFIG.prechatTitle;
+            document.getElementById('admin-prechat-subtitle').value = cfg.prechatSubtitle || DEFAULT_CONFIG.prechatSubtitle;
+            document.getElementById('admin-btn-label').value = cfg.buttonLabel || DEFAULT_PRECHAT_TEXT;
+            document.getElementById('admin-auto-msg').value = cfg.autoMessage || DEFAULT_PRECHAT_TEXT;
+            document.getElementById('perm-show-name').checked = Boolean(cfg.showName);
+            document.getElementById('perm-req-name').checked = Boolean(cfg.requireName);
+            document.getElementById('perm-show-phone').checked = Boolean(cfg.showPhone);
+            document.getElementById('perm-req-phone').checked = Boolean(cfg.requirePhone);
+            document.getElementById('perm-mask-agent-phone').checked = Boolean(cfg.maskAgentPhone);
+            document.getElementById('perm-agent-invite').checked = Boolean(cfg.allowAgentInvite);
+            document.getElementById('perm-client-chat').checked = Boolean(cfg.allowClientChat);
+        }
 
         window.UI = {
             navigate: (id) => {
@@ -555,7 +697,7 @@
             scrollBottom: (id) => { const el = document.getElementById(id); if(el) setTimeout(() => el.scrollTop = el.scrollHeight, 50); },
             openModal: (id) => {
                 if(id === 'admin-settings') {
-                    document.getElementById('admin-auto-msg').value = state.autoMessage || DEFAULT_AUTO_MESSAGE;
+                    populateSettingsModal();
                 }
                 document.getElementById(`modal-${id}`).classList.remove('hidden');
             },
@@ -576,6 +718,7 @@
         };
 
         if(localStorage.getItem('crm_theme') === 'light') document.documentElement.classList.remove('dark');
+        applyPrechatAndPermissionsUI();
 
         const getPath = (col) => `artifacts/${appId}/public/data/${col}`;
 
@@ -586,13 +729,12 @@
             const urlParams = new URLSearchParams(window.location.search);
             state.targetAgentId = urlParams.get('agent');
 
-            // Route immediately if staff session already exists; keep clean loading view for client links
             if (savedRole === 'admin') {
                 state.role = 'admin';
                 const adminName = savedAdminUser || 'Admin HQ';
                 document.getElementById('admin-brand-title').textContent = adminName;
                 document.getElementById('admin-edit-user').value = adminName;
-                document.getElementById('admin-auto-msg').value = state.autoMessage;
+                populateSettingsModal();
                 UI.navigate('admin-dash');
             } else if (savedRole === 'agent' && savedAgentId) {
                 state.role = 'agent';
@@ -626,13 +768,25 @@
             const unsubSettings = onSnapshot(doc(state.db, getPath('settings'), 'config'), snap => {
                 if(snap.exists()) {
                     const data = snap.data();
-                    if(typeof data.autoMessage === 'string' && data.autoMessage.trim()) {
-                        state.autoMessage = data.autoMessage.trim();
-                        localStorage.setItem('crm_client_auto_msg', state.autoMessage);
-                        const inputEl = document.getElementById('admin-auto-msg');
-                        if(inputEl && document.getElementById('modal-admin-settings').classList.contains('hidden')) {
-                            inputEl.value = state.autoMessage;
-                        }
+                    state.config = {
+                        ...DEFAULT_CONFIG,
+                        ...state.config,
+                        prechatTitle: (data.prechatTitle || '').trim() || DEFAULT_CONFIG.prechatTitle,
+                        prechatSubtitle: (data.prechatSubtitle || '').trim() || DEFAULT_CONFIG.prechatSubtitle,
+                        buttonLabel: (data.buttonLabel || '').trim() || DEFAULT_PRECHAT_TEXT,
+                        autoMessage: (data.autoMessage || '').trim() || DEFAULT_PRECHAT_TEXT,
+                        showName: data.showName !== undefined ? Boolean(data.showName) : true,
+                        requireName: data.requireName !== undefined ? Boolean(data.requireName) : true,
+                        showPhone: data.showPhone !== undefined ? Boolean(data.showPhone) : true,
+                        requirePhone: data.requirePhone !== undefined ? Boolean(data.requirePhone) : true,
+                        maskAgentPhone: data.maskAgentPhone !== undefined ? Boolean(data.maskAgentPhone) : true,
+                        allowAgentInvite: data.allowAgentInvite !== undefined ? Boolean(data.allowAgentInvite) : true,
+                        allowClientChat: data.allowClientChat !== undefined ? Boolean(data.allowClientChat) : true
+                    };
+                    localStorage.setItem('crm_portal_config', JSON.stringify(state.config));
+                    applyPrechatAndPermissionsUI();
+                    if (document.getElementById('modal-admin-settings') && !document.getElementById('modal-admin-settings').classList.contains('hidden')) {
+                        populateSettingsModal();
                     }
                 }
             }, () => {});
@@ -670,7 +824,8 @@
                     const latest = newMsgs[newMsgs.length - 1];
                     if(latest.sender === 'client' && latest.agentId === state.myAgentId) {
                         if(latest.clientId !== state.agentSelectedClient && !state.mutes[latest.clientId]) {
-                            UI.showToast("New message received!");
+                            const cli = state.clients.find(c => c.id === latest.clientId);
+                            UI.showToast(`New message from ${cli ? cli.name : 'Client'}: ${latest.text || ''}`);
                         }
                     }
                 }
@@ -702,34 +857,48 @@
                 const newU = document.getElementById('admin-edit-user').value.trim();
                 const oldP = document.getElementById('admin-old-pwd').value;
                 const newP = document.getElementById('admin-new-pwd').value.trim();
-                const autoMsg = document.getElementById('admin-auto-msg').value.trim() || DEFAULT_AUTO_MESSAGE;
 
                 if(!newU || !oldP) { UI.showToast("Username & current password required", true); return; }
                 
                 const savedOld = localStorage.getItem('crm_admin_pwd') || 'password123';
                 if(oldP !== savedOld) { UI.showToast("Incorrect current password", true); return; }
 
+                const updatedConfig = {
+                    prechatTitle: document.getElementById('admin-prechat-title').value.trim() || DEFAULT_CONFIG.prechatTitle,
+                    prechatSubtitle: document.getElementById('admin-prechat-subtitle').value.trim() || DEFAULT_CONFIG.prechatSubtitle,
+                    buttonLabel: document.getElementById('admin-btn-label').value.trim() || DEFAULT_PRECHAT_TEXT,
+                    autoMessage: document.getElementById('admin-auto-msg').value.trim() || DEFAULT_PRECHAT_TEXT,
+                    showName: document.getElementById('perm-show-name').checked,
+                    requireName: document.getElementById('perm-req-name').checked,
+                    showPhone: document.getElementById('perm-show-phone').checked,
+                    requirePhone: document.getElementById('perm-req-phone').checked,
+                    maskAgentPhone: document.getElementById('perm-mask-agent-phone').checked,
+                    allowAgentInvite: document.getElementById('perm-agent-invite').checked,
+                    allowClientChat: document.getElementById('perm-client-chat').checked
+                };
+
                 if(newP) localStorage.setItem('crm_admin_pwd', newP);
                 localStorage.setItem('crm_admin_user', newU);
                 sessionStorage.setItem('crm_admin_user', newU);
 
-                state.autoMessage = autoMsg;
-                localStorage.setItem('crm_client_auto_msg', autoMsg);
+                state.config = { ...state.config, ...updatedConfig };
+                localStorage.setItem('crm_portal_config', JSON.stringify(state.config));
+                applyPrechatAndPermissionsUI();
 
                 try {
                     await setDoc(doc(state.db, getPath('settings'), 'config'), {
-                        autoMessage: autoMsg,
+                        ...updatedConfig,
                         updatedAt: Date.now()
                     }, { merge: true });
                 } catch(e) {
-                    console.error("Failed to sync auto message:", e);
+                    console.error("Failed to sync settings:", e);
                 }
 
                 document.getElementById('admin-brand-title').textContent = newU;
                 document.getElementById('admin-old-pwd').value = '';
                 document.getElementById('admin-new-pwd').value = '';
                 UI.closeModal('admin-settings');
-                UI.showToast("Admin settings & auto message updated!");
+                UI.showToast("Pre-chat form, button & permissions saved!");
             },
 
             openEditAgentModal: (id, name, username) => {
@@ -814,11 +983,12 @@
                 
                 const client = state.clients.find(c => c.id === clientId);
                 if(client) {
+                    const displayPhone = maskPhoneDisplay(client.phone);
                     document.getElementById('agent-active-client-info').classList.remove('hidden');
                     document.getElementById('agent-no-client-info').classList.add('hidden');
                     document.getElementById('agent-chat-actions').classList.remove('hidden');
                     document.getElementById('agent-chat-title').textContent = client.name;
-                    document.getElementById('agent-chat-subtitle').textContent = client.phone;
+                    document.getElementById('agent-chat-subtitle').textContent = displayPhone;
                     document.getElementById('agent-chat-initial').textContent = client.name.charAt(0).toUpperCase();
                     document.getElementById('agent-chat-input-area').classList.remove('hidden');
                     
@@ -830,7 +1000,7 @@
 
                     if(rAvatar) rAvatar.textContent = client.name.charAt(0).toUpperCase();
                     if(rName) rName.textContent = client.name;
-                    if(rPhone) rPhone.textContent = client.phone;
+                    if(rPhone) rPhone.textContent = displayPhone;
                     if(rJoined) rJoined.textContent = UI.formatDate(client.createdAt);
                     if(rNotes) rNotes.value = localStorage.getItem(`crm_note_${clientId}`) || '';
 
@@ -880,7 +1050,7 @@
 
                 document.getElementById('admin-brand-title').textContent = adminUser;
                 document.getElementById('admin-edit-user').value = adminUser;
-                document.getElementById('admin-auto-msg').value = state.autoMessage;
+                populateSettingsModal();
 
                 UI.navigate('admin-dash');
                 renderAdminAgents();
@@ -925,6 +1095,7 @@
                 document.getElementById('agent-dash-name').textContent = agent.name;
                 document.getElementById('agent-dash-initial').textContent = agent.name.charAt(0).toUpperCase();
                 document.getElementById('agent-invite-link').value = `${window.location.origin}${window.location.pathname}?agent=${agent.id}`;
+                applyPrechatAndPermissionsUI();
                 UI.navigate('agent-dash');
                 renderAgentClients();
             } else { UI.showToast("Invalid credentials", true); }
@@ -945,18 +1116,27 @@
             } catch(e) { UI.showToast("Failed to send", true); }
         });
 
-        // Client Pre-Chat Form Submit -> Creates/Updates Client + Sends Configured Auto Message as Client
+        // Client Pre-Chat Form Submit -> Creates/Updates Client + Sends Configured Auto Message to Agent
         document.getElementById('form-client-onboard').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const n = document.getElementById('client-name').value.trim();
-            const p = document.getElementById('client-phone').value.trim();
-            if(!n || !p || !state.targetAgentId) return;
+            const n = document.getElementById('client-name').value.trim() || 'Guest Client';
+            const p = document.getElementById('client-phone').value.trim() || 'Not Provided';
+            if(!state.targetAgentId) return;
+
+            if(state.config.showName && state.config.requireName && !document.getElementById('client-name').value.trim()) {
+                UI.showToast("Please enter your name", true);
+                return;
+            }
+            if(state.config.showPhone && state.config.requirePhone && !document.getElementById('client-phone').value.trim()) {
+                UI.showToast("Please enter your phone number", true);
+                return;
+            }
 
             try {
-                let existingClient = state.clients.find(c => c.phone === p && c.agentId === state.targetAgentId);
+                let existingClient = p !== 'Not Provided' ? state.clients.find(c => c.phone === p && c.agentId === state.targetAgentId) : null;
                 let cid;
                 const now = Date.now();
-                const autoText = (state.autoMessage || DEFAULT_AUTO_MESSAGE).trim();
+                const autoText = (state.config.autoMessage || state.config.buttonLabel || DEFAULT_PRECHAT_TEXT).trim();
 
                 if (existingClient) {
                     cid = existingClient.id;
@@ -977,7 +1157,6 @@
                     });
                 }
 
-                // Send auto message from client side into the agent's chat
                 if (autoText) {
                     await addDoc(collection(state.db, getPath('messages')), {
                         clientId: cid,
@@ -992,6 +1171,7 @@
                 localStorage.setItem(`crm_client_lock_${state.targetAgentId}`, cid);
                 state.myClientId = cid;
                 state.role = 'client';
+                applyPrechatAndPermissionsUI();
                 UI.navigate('client-chat');
                 renderClientChat();
             } catch(e) {
@@ -1002,6 +1182,10 @@
 
         document.getElementById('form-client-msg').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if(!state.config.allowClientChat) {
+                UI.showToast("Messaging is disabled by admin", true);
+                return;
+            }
             if(!state.myClientId || state.role !== 'client') return;
             const input = document.getElementById('client-input-text');
             const txt = input.value.trim();
@@ -1260,6 +1444,7 @@
                 const sel = state.agentSelectedClient === c.id;
                 const unreadCount = state.messages.filter(m => m.clientId === c.id && m.sender === 'client' && !m.seen).length;
                 const isMuted = state.mutes[c.id];
+                const displayPhone = maskPhoneDisplay(c.phone);
                 html += `
                     <button onclick="app.agentSelectClient('${c.id}')" class="w-full text-left p-4 hover:bg-slate-100 dark:hover:bg-slate-800/50 flex flex-col gap-1 ${sel ? 'bg-amber-500/10 border-l-4 border-amber-500' : ''}">
                         <div class="flex justify-between items-center">
@@ -1269,7 +1454,7 @@
                                 ${unreadCount > 0 ? `<span class="bg-amber-500 text-black font-bold text-[10px] px-1.5 py-0.5 rounded-full">${unreadCount}</span>` : ''}
                             </div>
                         </div>
-                        <span class="text-[10px] text-amber-500 font-mono">${UI.escape(c.phone)}</span>
+                        <span class="text-[10px] text-amber-500 font-mono">${UI.escape(displayPhone)}</span>
                         <span class="text-[10px] text-slate-400 truncate">${UI.escape(c.lastMessage || '')}</span>
                     </button>
                 `;
@@ -1317,12 +1502,14 @@
             if(lockedClientId) {
                 state.myClientId = lockedClientId;
                 state.role = 'client';
+                applyPrechatAndPermissionsUI();
                 UI.navigate('client-chat');
                 renderClientChat();
                 return;
             }
 
             document.getElementById('client-agent-name').textContent = agent.name;
+            applyPrechatAndPermissionsUI();
             UI.navigate('client-onboard');
         }
 
