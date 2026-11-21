@@ -19,12 +19,12 @@
         }
     </script>
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            overflow: hidden; 
-            height: 100vh; 
-            height: 100dvh; 
-            margin: 0; 
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            height: 100dvh;
+            margin: 0;
         }
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -35,7 +35,6 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         .modal-overlay { backdrop-filter: blur(6px); background-color: rgba(0, 0, 0, 0.6); }
 
-        /* Responsive Drawer styling for Mobile Right Panel */
         @media (max-width: 1023px) {
             .mobile-right-panel {
                 position: fixed !important;
@@ -55,19 +54,24 @@
         <span id="toast-msg"></span>
     </div>
 
-    <!-- Modal: Admin Settings -->
+    <!-- Modal: Admin Settings (Includes Client Auto-Message Config) -->
     <div id="modal-admin-settings" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl fade-in">
-            <h3 class="text-lg font-bold mb-2">Admin Profile Settings</h3>
-            <p class="text-xs text-slate-500 mb-4">Update your admin username and password.</p>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl fade-in max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold mb-1">Admin Profile & Auto-Message Settings</h3>
+            <p class="text-xs text-slate-500 mb-4">Update admin credentials and client pre-chat auto message.</p>
             <div class="space-y-3">
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Client Pre-Chat Auto Message (Meta Ads)</label>
+                    <input type="text" id="admin-auto-msg" class="w-full bg-slate-100 dark:bg-slate-800 border border-amber-500/50 rounded-xl px-4 py-3 text-sm outline-none focus:border-amber-500" placeholder="Hi need more details on this.">
+                    <p class="text-[10px] text-slate-400 mt-1">Client pre-chat form submit karte hi yeh message client ki taraf se send hoga.</p>
+                </div>
                 <div>
                     <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Admin Username</label>
                     <input type="text" id="admin-edit-user" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-amber-500">
                 </div>
                 <div>
                     <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Current Password</label>
-                    <input type="password" id="admin-old-pwd" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-amber-500" placeholder="Required for security">
+                    <input type="password" id="admin-old-pwd" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-amber-500" placeholder="Required to save changes">
                 </div>
                 <div>
                     <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">New Password (Optional)</label>
@@ -100,7 +104,7 @@
     </div>
 
     <!-- View: Landing Portal Selection -->
-    <div id="view-landing" class="view items-center justify-center p-4 relative overflow-y-auto">
+    <div id="view-landing" class="view active items-center justify-center p-4 relative overflow-y-auto">
         <button onclick="UI.toggleTheme()" class="absolute top-6 right-6 p-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:scale-105 transition-all">
             <svg class="w-5 h-5 theme-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
         </button>
@@ -153,7 +157,6 @@
 
     <!-- View: Admin Dashboard -->
     <div id="view-admin-dash" class="view bg-slate-50 dark:bg-slate-950 flex-col md:flex-row">
-        <!-- Sidebar Navigation (Top Header Bar on Mobile, Left Column on Desktop) -->
         <nav class="w-full md:w-60 bg-white dark:bg-slate-900 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0 z-20">
             <div class="h-14 md:h-16 flex items-center justify-between px-4 md:px-6 border-b border-slate-200 dark:border-slate-800 shrink-0">
                 <span class="font-bold text-sm block" id="admin-brand-title">Admin HQ</span>
@@ -177,7 +180,7 @@
                 </button>
             </div>
             <div class="hidden md:flex p-3 border-t border-slate-200 dark:border-slate-800 flex-col gap-2 mt-auto">
-                <button onclick="UI.openModal('admin-settings')" class="w-full py-2.5 px-3 text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-center">Settings / Edit Profile</button>
+                <button onclick="UI.openModal('admin-settings')" class="w-full py-2.5 px-3 text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-center">Settings / Auto-Msg</button>
                 <button onclick="app.logout()" class="w-full py-2.5 px-3 text-xs font-semibold text-red-500 hover:bg-red-500/10 rounded-xl text-center">Logout</button>
             </div>
         </nav>
@@ -332,10 +335,8 @@
 
     <!-- View: Agent Dashboard -->
     <div id="view-agent-dash" class="view bg-slate-50 dark:bg-slate-950 flex-row relative">
-        <!-- Overlay for Mobile Sidebar Drawer -->
         <div id="agent-sidebar-overlay" onclick="UI.closeAgentSidebar()" class="fixed inset-0 bg-black/60 z-20 hidden md:hidden backdrop-blur-sm"></div>
 
-        <!-- Sidebar: Client List (Left Column) -->
         <div class="w-80 max-w-[85vw] md:max-w-none bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full shrink-0 absolute md:relative z-30 -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out" id="agent-sidebar">
             <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex justify-between items-center">
                 <div class="flex items-center gap-2.5">
@@ -360,7 +361,6 @@
             <div class="flex-1 overflow-y-auto divide-y divide-slate-200 dark:divide-slate-800" id="agent-client-list"></div>
         </div>
 
-        <!-- Chat Panel (Middle Column) -->
         <div class="flex-1 flex flex-col h-full bg-white dark:bg-slate-950 relative border-r border-slate-200 dark:border-slate-800 w-full">
             <div class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center px-4 justify-between shrink-0 z-10">
                 <div class="flex items-center gap-3 truncate">
@@ -392,7 +392,6 @@
             </div>
         </div>
 
-        <!-- Client Details & Quick Replies (Right Column Drawer) -->
         <div id="agent-right-panel" class="w-80 max-w-[85vw] lg:max-w-none bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col h-full shrink-0 hidden lg:flex mobile-right-panel">
             <div class="p-4 border-b border-slate-200 dark:border-slate-800 font-bold text-xs uppercase text-slate-400 flex justify-between items-center">
                 <span>Client Profile & Tools</span>
@@ -432,7 +431,7 @@
         </div>
     </div>
 
-    <!-- View: Client Onboarding -->
+    <!-- View: Client Pre-Chat Form (Name + Mobile Number) -->
     <div id="view-client-onboard" class="view items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 overflow-y-auto">
         <div class="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl fade-in text-center">
             <h2 class="text-xl font-bold mb-1">Live Support Secure</h2>
@@ -440,11 +439,11 @@
             <form id="form-client-onboard" class="space-y-4 text-left">
                 <div>
                     <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Your Full Name</label>
-                    <input type="text" id="client-name" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none" required>
+                    <input type="text" id="client-name" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Enter your name" required>
                 </div>
                 <div>
                     <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Phone Number</label>
-                    <input type="tel" id="client-phone" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none" required>
+                    <input type="tel" id="client-phone" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-3 rounded-xl text-sm outline-none focus:border-amber-500" placeholder="Enter mobile number" required>
                 </div>
                 <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-3.5 rounded-xl text-sm transition-all shadow-md mt-2">Start Chat</button>
             </form>
@@ -482,6 +481,7 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        const DEFAULT_AUTO_MESSAGE = "Hi need more details on this.";
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'support-crm-secure-v2';
         const firebaseConfig = {
             apiKey: "AIzaSyAwFk3Nr7pVorxDaBv042HIo1y4B4nS1qU",
@@ -496,6 +496,7 @@
         const state = {
             db: null, auth: null, user: null, role: null,
             agents: [], clients: [], messages: [], mutes: {},
+            autoMessage: localStorage.getItem('crm_client_auto_msg') || DEFAULT_AUTO_MESSAGE,
             targetAgentId: null, myAgentId: null, myClientId: null,
             adminSelectedAgentId: null,
             adminSelectedClient: null, agentSelectedClient: null,
@@ -538,7 +539,12 @@
             formatDate: (ts) => ts ? new Date(ts).toLocaleString() : '',
             escape: (str) => { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; },
             scrollBottom: (id) => { const el = document.getElementById(id); if(el) setTimeout(() => el.scrollTop = el.scrollHeight, 50); },
-            openModal: (id) => document.getElementById(`modal-${id}`).classList.remove('hidden'),
+            openModal: (id) => {
+                if(id === 'admin-settings') {
+                    document.getElementById('admin-auto-msg').value = state.autoMessage || DEFAULT_AUTO_MESSAGE;
+                }
+                document.getElementById(`modal-${id}`).classList.remove('hidden');
+            },
             closeModal: (id) => document.getElementById(`modal-${id}`).classList.add('hidden'),
             copyLink: (id) => { document.getElementById(id).select(); document.execCommand('copy'); UI.showToast("Invite link copied!"); },
             openAgentSidebar: () => {
@@ -585,6 +591,7 @@
                         const adminName = savedAdminUser || 'Admin HQ';
                         document.getElementById('admin-brand-title').textContent = adminName;
                         document.getElementById('admin-edit-user').value = adminName;
+                        document.getElementById('admin-auto-msg').value = state.autoMessage;
                         UI.navigate('admin-dash');
                         renderAdminAgents();
                         renderAdminClients();
@@ -605,6 +612,20 @@
         function startRealtimeSync() {
             if(!state.user) return;
             state.unsubscribers.forEach(u => u()); state.unsubscribers = [];
+
+            const unsubSettings = onSnapshot(doc(state.db, getPath('settings'), 'config'), snap => {
+                if(snap.exists()) {
+                    const data = snap.data();
+                    if(typeof data.autoMessage === 'string' && data.autoMessage.trim()) {
+                        state.autoMessage = data.autoMessage.trim();
+                        localStorage.setItem('crm_client_auto_msg', state.autoMessage);
+                        const inputEl = document.getElementById('admin-auto-msg');
+                        if(inputEl && document.getElementById('modal-admin-settings').classList.contains('hidden')) {
+                            inputEl.value = state.autoMessage;
+                        }
+                    }
+                }
+            }, () => {});
 
             const unsubAgents = onSnapshot(collection(state.db, getPath('agents')), snap => {
                 state.agents = snap.docs.map(d => ({id: d.id, ...d.data()}));
@@ -650,7 +671,7 @@
                 if(state.role === 'client') renderClientChat();
             });
 
-            state.unsubscribers.push(unsubAgents, unsubClients, unsubMessages);
+            state.unsubscribers.push(unsubSettings, unsubAgents, unsubClients, unsubMessages);
         }
 
         window.app = {
@@ -667,6 +688,8 @@
                 const newU = document.getElementById('admin-edit-user').value.trim();
                 const oldP = document.getElementById('admin-old-pwd').value;
                 const newP = document.getElementById('admin-new-pwd').value.trim();
+                const autoMsg = document.getElementById('admin-auto-msg').value.trim() || DEFAULT_AUTO_MESSAGE;
+
                 if(!newU || !oldP) { UI.showToast("Username & current password required", true); return; }
                 
                 const savedOld = localStorage.getItem('crm_admin_pwd') || 'password123';
@@ -676,9 +699,23 @@
                 localStorage.setItem('crm_admin_user', newU);
                 sessionStorage.setItem('crm_admin_user', newU);
 
+                state.autoMessage = autoMsg;
+                localStorage.setItem('crm_client_auto_msg', autoMsg);
+
+                try {
+                    await setDoc(doc(state.db, getPath('settings'), 'config'), {
+                        autoMessage: autoMsg,
+                        updatedAt: Date.now()
+                    }, { merge: true });
+                } catch(e) {
+                    console.error("Failed to sync auto message:", e);
+                }
+
                 document.getElementById('admin-brand-title').textContent = newU;
+                document.getElementById('admin-old-pwd').value = '';
+                document.getElementById('admin-new-pwd').value = '';
                 UI.closeModal('admin-settings');
-                UI.showToast("Admin profile updated successfully!");
+                UI.showToast("Admin settings & auto message updated!");
             },
 
             openEditAgentModal: (id, name, username) => {
@@ -829,6 +866,7 @@
 
                 document.getElementById('admin-brand-title').textContent = adminUser;
                 document.getElementById('admin-edit-user').value = adminUser;
+                document.getElementById('admin-auto-msg').value = state.autoMessage;
 
                 UI.navigate('admin-dash');
                 renderAdminAgents();
@@ -850,7 +888,10 @@
                 });
                 document.getElementById('form-create-agent').reset();
                 UI.showToast("Agent created successfully!");
-            } catch(e) { UI.showToast("Error creating agent", true); }
+            } catch(e) {
+                console.error("Create agent error:", e);
+                UI.showToast("Error creating agent: " + (e.code || e.message || "Unknown"), true);
+            }
         });
 
         document.getElementById('form-agent-login').addEventListener('submit', async (e) => {
@@ -890,6 +931,7 @@
             } catch(e) { UI.showToast("Failed to send", true); }
         });
 
+        // Client Pre-Chat Form Submit -> Creates/Updates Client + Sends Configured Auto Message as Client
         document.getElementById('form-client-onboard').addEventListener('submit', async (e) => {
             e.preventDefault();
             const n = document.getElementById('client-name').value.trim();
@@ -899,17 +941,37 @@
             try {
                 let existingClient = state.clients.find(c => c.phone === p && c.agentId === state.targetAgentId);
                 let cid;
+                const now = Date.now();
+                const autoText = (state.autoMessage || DEFAULT_AUTO_MESSAGE).trim();
 
                 if (existingClient) {
                     cid = existingClient.id;
                     await updateDoc(doc(state.db, getPath('clients'), cid), {
                         name: n,
-                        lastMessageTime: Date.now()
+                        lastMessage: autoText,
+                        lastMessageTime: now
                     });
                 } else {
                     cid = 'cli_' + Math.random().toString(36).substr(2,10);
                     await setDoc(doc(state.db, getPath('clients'), cid), {
-                        agentId: state.targetAgentId, name: n, phone: p, createdAt: Date.now(), lastMessage: 'Joined', lastMessageTime: Date.now()
+                        agentId: state.targetAgentId,
+                        name: n,
+                        phone: p,
+                        createdAt: now,
+                        lastMessage: autoText,
+                        lastMessageTime: now
+                    });
+                }
+
+                // Send auto message from client side into the agent's chat
+                if (autoText) {
+                    await addDoc(collection(state.db, getPath('messages')), {
+                        clientId: cid,
+                        agentId: state.targetAgentId,
+                        sender: 'client',
+                        text: autoText,
+                        timestamp: now,
+                        seen: false
                     });
                 }
 
@@ -918,7 +980,10 @@
                 state.role = 'client';
                 UI.navigate('client-chat');
                 renderClientChat();
-            } catch(e) { UI.showToast("Onboarding failed", true); }
+            } catch(e) {
+                console.error("Onboarding error:", e);
+                UI.showToast("Onboarding failed", true);
+            }
         });
 
         document.getElementById('form-client-msg').addEventListener('submit', async (e) => {
