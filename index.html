@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Enterprise Live Support CRM</title>
+
+    <!-- Google Tag Manager / Google Ads Tracking -->
+    <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-53CNSWBB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
@@ -1116,7 +1125,7 @@
             } catch(e) { UI.showToast("Failed to send", true); }
         });
 
-        // Client Pre-Chat Form Submit -> Creates/Updates Client + Sends Configured Auto Message to Agent
+        // Client Pre-Chat Form Submit -> Creates/Updates Client + Sends Configured Auto Message + Pushes GTM Event
         document.getElementById('form-client-onboard').addEventListener('submit', async (e) => {
             e.preventDefault();
             const n = document.getElementById('client-name').value.trim() || 'Guest Client';
@@ -1167,6 +1176,14 @@
                         seen: false
                     });
                 }
+
+                // Push Conversion Event to Google Tag Manager dataLayer
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({
+                    event: 'prechat_lead_submit',
+                    agent_id: state.targetAgentId,
+                    client_id: cid
+                });
 
                 localStorage.setItem(`crm_client_lock_${state.targetAgentId}`, cid);
                 state.myClientId = cid;
